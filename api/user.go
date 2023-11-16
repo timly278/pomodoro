@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 	db "pomodoro/db/sqlc"
 	"pomodoro/util"
@@ -13,24 +14,6 @@ type createUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6,max=12"`
 	Email    string `json:"email" binding:"required,email"`
-}
-
-type createUserResponse struct {
-	ID                int64     `json:"id"`
-	Username          string    `json:"username" `
-	Email             string    `json:"email"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
-	CreatedAt         time.Time `json:"created_at"`
-}
-
-func newUserResponse(user db.User) createUserResponse {
-	return createUserResponse{
-		ID:                user.ID,
-		Username:          user.Username,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
 }
 
 // CreateUser - user signing up
@@ -67,7 +50,56 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 	})
 }
 
+type userLoginRequest struct {
+	Username string `json:"username" binding:"required,alphanum"`
+	Password string `json:"password" binding:"required,min=6,max=12"`
+}
+
+type userLoginResponse struct {
+	AccessToken string       `json:"access_token"`
+	User        userResponse `json:"user"`
+}
+
 func (server *Server) UserLogin(ctx *gin.Context) {
+	var userLogin userLoginRequest
+
+	err := ctx.ShouldBindJSON(&userLogin)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	user, err := server.store.GetUser(ctx, userLogin.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	err = util.VerifyPassword(userLogin.Password, user.HashedPassword)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	accessToken, err := server.tokenMaker.CreateToken(user.Username, 1*time.Minute)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	res := userLoginResponse{
+		AccessToken: accessToken,
+		User:        newUserResponse(user),
+	}
+
+	ctx.JSON(http.StatusOK, response{
+		Message: "login successfully",
+		Data:    res,
+	})
 
 }
 
