@@ -5,6 +5,7 @@ import (
 	"pomodoro/auth"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/middleware"
+	"pomodoro/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,18 +13,19 @@ import (
 type Server struct {
 	store      db.Store
 	tokenMaker auth.TokenMaker
+	config     util.Config
 	router     *gin.Engine
 }
 
-func NewServer(store db.Store) (*Server, error) {
-	const secretKey = "tulb123456789tulb123456789tulb123456789tulb123456789"
-	tokenMaker, err := auth.NewJwtTokenMaker(secretKey)
+func NewServer(store db.Store, config util.Config) (*Server, error) {
+	tokenMaker, err := auth.NewJwtTokenMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 	return &Server{
 		store:      store,
 		tokenMaker: tokenMaker,
+		config:     config,
 		router:     gin.Default(),
 	}, nil
 }

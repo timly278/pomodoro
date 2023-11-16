@@ -6,7 +6,6 @@ import (
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"pomodoro/util"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -86,7 +85,7 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(user.Username, 5*time.Minute)
+	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		return
@@ -107,4 +106,3 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 func (server *Server) UserLogout(ctx *gin.Context) {
 
 }
-

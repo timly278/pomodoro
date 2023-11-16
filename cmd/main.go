@@ -5,30 +5,31 @@ import (
 	"log"
 	"pomodoro/api"
 	db "pomodoro/db/sqlc"
+	"pomodoro/util"
 
 	_ "github.com/lib/pq"
 )
 
-const (
-	SERVER_ADDRESS = "0.0.0.0:8080"
-	DB_DRIVER      = "postgres"
-	DB_SOURCE      = "postgresql://root:tulb@localhost:5432/pomodoro?sslmode=disable"
-)
-
 func main() {
-	dataBase, err := sql.Open(DB_DRIVER, DB_SOURCE)
+
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Println("cannot load config:", err)
+		return
+	}
+	dataBase, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Println("cannot open data base.", err)
 	}
 
 	store := db.NewSQLStore(dataBase)
-	server, err := api.NewServer(store)
+	server, err := api.NewServer(store, config)
 	if err != nil {
 		log.Println("cannot create server", err)
 	}
 
 	server.Setup()
-	err = server.Start(SERVER_ADDRESS)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Println("can not start server.", err)
 	}
