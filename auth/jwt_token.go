@@ -8,12 +8,18 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const MIN_SECRETKEY_SIZE = 32
+
 type JwtTokenMaker struct {
 	secretKey string
 }
 
-func NewJwtTokenMaker(secretKey string) *JwtTokenMaker {
-	return &JwtTokenMaker{secretKey: secretKey}
+func NewJwtTokenMaker(secretKey string) (*JwtTokenMaker, error) {
+	if len(secretKey) < MIN_SECRETKEY_SIZE {
+		return nil, fmt.Errorf("invalid key size: must be at least %d characters", MIN_SECRETKEY_SIZE)
+	}
+
+	return &JwtTokenMaker{secretKey: secretKey}, nil
 }
 
 // method to create token

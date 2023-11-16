@@ -1,4 +1,4 @@
-package api
+package response
 
 import (
 	"fmt"
@@ -9,12 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type response struct {
+type Response struct {
 	Message string `json:"message"`
 	Data    any    `json:"any"`
 }
 
-func errorResponse(err error) gin.H {
+func ErrorResponse(err error) gin.H {
 	errs := strings.SplitAfter(err.Error(), "\n")
 	maping := make(map[string]any)
 	for i, e := range errs {
@@ -23,7 +23,7 @@ func errorResponse(err error) gin.H {
 	return maping
 }
 
-type userResponse struct {
+type UserResponse struct {
 	ID                int64     `json:"id"`
 	Username          string    `json:"username" `
 	Email             string    `json:"email"`
@@ -31,8 +31,8 @@ type userResponse struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
-func newUserResponse(user db.User) userResponse {
-	return userResponse{
+func NewUserResponse(user db.User) UserResponse {
+	return UserResponse{
 		ID:                user.ID,
 		Username:          user.Username,
 		Email:             user.Email,
