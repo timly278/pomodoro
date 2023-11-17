@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Dosomething just for testing
 func (server *Server) Dosomething(ctx *gin.Context) {
 	num := ctx.Param("num")
 	x, err := strconv.Atoi(num)

@@ -6,6 +6,7 @@ import (
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"pomodoro/util"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,12 +17,30 @@ type createUserRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 }
 
+type userResponse struct {
+	ID                int64     `json:"id"`
+	Username          string    `json:"username" `
+	Email             string    `json:"email"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	CreatedAt         time.Time `json:"created_at"`
+}
+
+func newUserResponse(user db.User) userResponse {
+	return userResponse{
+		ID:                user.ID,
+		Username:          user.Username,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
+}
+
 // CreateUser - user signing up
 func (server *Server) CreateUser(ctx *gin.Context) {
 	var newUser createUserRequest
 	err := ctx.ShouldBindJSON(&newUser)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
 		return
 	}
 
@@ -43,7 +62,7 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	rsp := response.NewUserResponse(createdUser)
+	rsp := newUserResponse(createdUser)
 	ctx.JSON(http.StatusOK, response.Response{
 		Message: "register successfully",
 		Data:    rsp,
@@ -56,16 +75,17 @@ type userLoginRequest struct {
 }
 
 type userLoginResponse struct {
-	AccessToken string                `json:"access_token"`
-	User        response.UserResponse `json:"user"`
+	AccessToken string       `json:"access_token"`
+	User        userResponse `json:"user"`
 }
 
+// UserLogin 
 func (server *Server) UserLogin(ctx *gin.Context) {
 	var userLogin userLoginRequest
 
 	err := ctx.ShouldBindJSON(&userLogin)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
 		return
 	}
 
@@ -93,7 +113,7 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 
 	res := userLoginResponse{
 		AccessToken: accessToken,
-		User:        response.NewUserResponse(user),
+		User:        newUserResponse(user),
 	}
 
 	ctx.JSON(http.StatusOK, response.Response{
@@ -103,6 +123,8 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 
 }
 
+// UserLogout 
 func (server *Server) UserLogout(ctx *gin.Context) {
-
+	// destroy the payload
+	
 }

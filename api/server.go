@@ -37,8 +37,8 @@ func (server *Server) Start(address string) error {
 func (server *Server) Setup() {
 	router := gin.Default()
 
-	router.POST("/register", server.CreateUser)
-	router.POST("/login", server.UserLogin)
+	router.POST("/register", middleware.EnsureNotLoggedIn(server.tokenMaker), server.CreateUser)
+	router.POST("/login", middleware.EnsureNotLoggedIn(server.tokenMaker), server.UserLogin)
 
 	authRoutes := router.Group("/")
 	authRoutes.Use(middleware.EnsureLoggedIn(server.tokenMaker))

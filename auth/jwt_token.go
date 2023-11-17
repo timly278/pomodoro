@@ -44,16 +44,13 @@ func (maker *JwtTokenMaker) VerifyToken(tokenString string) (*Payload, error) {
 		return []byte(maker.secretKey), nil
 	}
 
-	var payload Payload
-	token, err := jwt.ParseWithClaims(tokenString, &payload, keyfunc)
+	token, err := jwt.ParseWithClaims(tokenString, &Payload{}, keyfunc)
 	if err != nil {
 		return nil, err
 	}
-	//test payload
 	payload2, ok := token.Claims.(*Payload)
 	if !ok {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
-	fmt.Printf("payload: %v,\npayload2: %v\n", payload, payload2)
 	return payload2, nil
 }
