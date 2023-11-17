@@ -79,7 +79,7 @@ type userLoginResponse struct {
 	User        userResponse `json:"user"`
 }
 
-// UserLogin 
+// UserLogin
 func (server *Server) UserLogin(ctx *gin.Context) {
 	var userLogin userLoginRequest
 
@@ -123,8 +123,12 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 
 }
 
-// UserLogout 
+// UserLogout
 func (server *Server) UserLogout(ctx *gin.Context) {
-	// destroy the payload
-	
+	// create blacklist to store logged out token
+	// implement blacklist on Redis to take advantage of speed
+
+	// if you use oauth to login with google for example, you dont need to let user logout
+	// todo: add login using oauth2.0
+	// todo: do we really need to implement setUserStatus middleware handler?
 }
