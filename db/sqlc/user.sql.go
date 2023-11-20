@@ -13,20 +13,30 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users (
   username,
   hashed_password,
-  email
+  email,
+  alarm_sound,
+  repeat_alarm
 ) VALUES (
-  $1, $2, $3
-) RETURNING id, username, hashed_password, email, password_changed_at, created_at
+  $1, $2, $3, $4, $5
+) RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm
 `
 
 type CreateUserParams struct {
 	Username       string `json:"username"`
 	HashedPassword string `json:"hashed_password"`
 	Email          string `json:"email"`
+	AlarmSound     string `json:"alarm_sound"`
+	RepeatAlarm    int32  `json:"repeat_alarm"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.HashedPassword, arg.Email)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Username,
+		arg.HashedPassword,
+		arg.Email,
+		arg.AlarmSound,
+		arg.RepeatAlarm,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -35,12 +45,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Email,
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, hashed_password, email, password_changed_at, created_at FROM users
+SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -54,12 +66,14 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 		&i.Email,
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, username, hashed_password, email, password_changed_at, created_at FROM users
+SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -73,6 +87,8 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 		&i.Email,
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
 	)
 	return i, err
 }

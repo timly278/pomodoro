@@ -8,6 +8,47 @@ import (
 	"time"
 )
 
+type Goalperday struct {
+	ID        int64     `json:"id"`
+	UserID    int64     `json:"user_id"`
+	Pomonum   int32     `json:"pomonum"`
+	TypeID    int32     `json:"type_id"`
+	CreatedAt time.Time `json:"created_at"`
+	ChangedAt time.Time `json:"changed_at"`
+}
+
+type Pomodoro struct {
+	ID          int64     `json:"id"`
+	UserID      int64     `json:"user_id"`
+	TypeID      int32     `json:"type_id"`
+	TaskID      int64     `json:"task_id"`
+	FocusDegree int32     `json:"focus_degree"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+type Task struct {
+	ID            int64     `json:"id"`
+	UserID        int64     `json:"user_id"`
+	Content       string    `json:"content"`
+	Status        int32     `json:"status"`
+	EstimatePomos int32     `json:"estimate_pomos"`
+	ProgressPomos int32     `json:"progress_pomos"`
+	CreatedAt     time.Time `json:"created_at"`
+	CompletedAt   time.Time `json:"completed_at"`
+}
+
+type Type struct {
+	ID                int32  `json:"id"`
+	UserID            int64  `json:"user_id"`
+	Name              string `json:"name"`
+	Color             string `json:"color"`
+	Duration          int32  `json:"duration"`
+	Shortbreak        int32  `json:"shortbreak"`
+	Longbreak         int32  `json:"longbreak"`
+	Longbreakinterval int32  `json:"longbreakinterval"`
+	AutostartBreak    bool   `json:"autostart_break"`
+}
+
 type User struct {
 	ID                int64     `json:"id"`
 	Username          string    `json:"username"`
@@ -15,4 +56,6 @@ type User struct {
 	Email             string    `json:"email"`
 	PasswordChangedAt time.Time `json:"password_changed_at"`
 	CreatedAt         time.Time `json:"created_at"`
+	AlarmSound        string    `json:"alarm_sound"`
+	RepeatAlarm       int32     `json:"repeat_alarm"`
 }
