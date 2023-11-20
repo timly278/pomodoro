@@ -26,3 +26,13 @@ func RandomString(n int) string {
 
 	return str.String()
 }
+
+func RandomColor() string {
+	var list = []string{"Red", "Yellow", "Orange", "Green"}
+	return list[RandomInt(0, int64(len(list) - 1))]
+}
+
+func RandomAlarmSound() string {
+	var list = []string{"Kitchen", "Bell", "Bird", "Digital"}
+	return list[RandomInt(0, int64(len(list) - 1))]
+}

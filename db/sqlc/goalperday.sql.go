@@ -16,13 +16,13 @@ INSERT INTO goalperday (
   type_id
 ) VALUES (
   $1, $2, $3
-) RETURNING id, user_id, pomonum, type_id, created_at, changed_at
+) RETURNING id, user_id, type_id, pomonum, created_at, changed_at
 `
 
 type CreateNewGoalParams struct {
 	UserID  int64 `json:"user_id"`
 	Pomonum int32 `json:"pomonum"`
-	TypeID  int32 `json:"type_id"`
+	TypeID  int64 `json:"type_id"`
 }
 
 func (q *Queries) CreateNewGoal(ctx context.Context, arg CreateNewGoalParams) (Goalperday, error) {
@@ -31,8 +31,8 @@ func (q *Queries) CreateNewGoal(ctx context.Context, arg CreateNewGoalParams) (G
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.Pomonum,
 		&i.TypeID,
+		&i.Pomonum,
 		&i.CreatedAt,
 		&i.ChangedAt,
 	)
@@ -50,7 +50,7 @@ func (q *Queries) DeleteGoal(ctx context.Context, id int64) error {
 }
 
 const listGoals = `-- name: ListGoals :many
-SELECT id, user_id, pomonum, type_id, created_at, changed_at FROM goalperday
+SELECT id, user_id, type_id, pomonum, created_at, changed_at FROM goalperday
 WHERE user_id = $1
 ORDER BY id
 `
@@ -67,8 +67,8 @@ func (q *Queries) ListGoals(ctx context.Context, userID int64) ([]Goalperday, er
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
-			&i.Pomonum,
 			&i.TypeID,
+			&i.Pomonum,
 			&i.CreatedAt,
 			&i.ChangedAt,
 		); err != nil {
@@ -91,13 +91,13 @@ SET
     pomonum = $2,
     type_id = $3
 WHERE id = $1
-RETURNING id, user_id, pomonum, type_id, created_at, changed_at
+RETURNING id, user_id, type_id, pomonum, created_at, changed_at
 `
 
 type UpdateGoalParams struct {
 	ID      int64 `json:"id"`
 	Pomonum int32 `json:"pomonum"`
-	TypeID  int32 `json:"type_id"`
+	TypeID  int64 `json:"type_id"`
 }
 
 func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goalperday, error) {
@@ -106,8 +106,8 @@ func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goalper
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.Pomonum,
 		&i.TypeID,
+		&i.Pomonum,
 		&i.CreatedAt,
 		&i.ChangedAt,
 	)

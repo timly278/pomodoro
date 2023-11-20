@@ -56,7 +56,7 @@ SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinter
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetTaskById(ctx context.Context, id int32) (Type, error) {
+func (q *Queries) GetTaskById(ctx context.Context, id int64) (Type, error) {
 	row := q.db.QueryRowContext(ctx, getTaskById, id)
 	var i Type
 	err := row.Scan(

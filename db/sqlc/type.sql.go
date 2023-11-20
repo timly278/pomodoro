@@ -66,7 +66,7 @@ SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinter
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetTypeById(ctx context.Context, id int32) (Type, error) {
+func (q *Queries) GetTypeById(ctx context.Context, id int64) (Type, error) {
 	row := q.db.QueryRowContext(ctx, getTypeById, id)
 	var i Type
 	err := row.Scan(
@@ -136,7 +136,7 @@ RETURNING id, user_id, name, color, duration, shortbreak, longbreak, longbreakin
 `
 
 type UpdateTypeByIdParams struct {
-	ID                int32  `json:"id"`
+	ID                int64  `json:"id"`
 	Name              string `json:"name"`
 	Color             string `json:"color"`
 	Shortbreak        int32  `json:"shortbreak"`

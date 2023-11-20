@@ -16,8 +16,8 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteGoal(ctx context.Context, id int64) error
 	GetPomodoroByUserId(ctx context.Context, userID int64) ([]Pomodoro, error)
-	GetTaskById(ctx context.Context, id int32) (Type, error)
-	GetTypeById(ctx context.Context, id int32) (Type, error)
+	GetTaskById(ctx context.Context, id int64) (Type, error)
+	GetTypeById(ctx context.Context, id int64) (Type, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	ListGoals(ctx context.Context, userID int64) ([]Goalperday, error)

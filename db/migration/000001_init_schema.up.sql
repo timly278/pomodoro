@@ -10,7 +10,7 @@ CREATE TABLE "users" (
 );
 
 CREATE TABLE "types" (
-  "id" int PRIMARY KEY,
+  "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "name" varchar(50) NOT NULL,
   "color" varchar NOT NULL,
@@ -23,16 +23,16 @@ CREATE TABLE "types" (
 
 CREATE TABLE "pomodoros" (
   "id" bigserial PRIMARY KEY,
-  "user_id" bigint NOT NULL,
-  "type_id" int NOT NULL,
-  "task_id" bigint NOT NULL,
+  "user_id" bigserial NOT NULL,
+  "type_id" bigserial NOT NULL,
+  "task_id" bigserial NOT NULL,
   "focus_degree" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "tasks" (
-  "id" bigint PRIMARY KEY,
-  "user_id" bigint NOT NULL,
+  "id" bigserial PRIMARY KEY,
+  "user_id" bigserial NOT NULL,
   "content" varchar(100) NOT NULL,
   "status" int NOT NULL,
   "estimate_pomos" int NOT NULL,
@@ -42,10 +42,10 @@ CREATE TABLE "tasks" (
 );
 
 CREATE TABLE "goalperday" (
-  "id" bigint PRIMARY KEY,
-  "user_id" bigint NOT NULL,
+  "id" bigserial PRIMARY KEY,
+  "user_id" bigserial NOT NULL,
+  "type_id" bigserial NOT NULL,
   "pomonum" int NOT NULL,
-  "type_id" int NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z'
 );

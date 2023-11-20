@@ -22,7 +22,7 @@ INSERT INTO pomodoros (
 
 type CreatePomodoroParams struct {
 	UserID      int64 `json:"user_id"`
-	TypeID      int32 `json:"type_id"`
+	TypeID      int64 `json:"type_id"`
 	TaskID      int64 `json:"task_id"`
 	FocusDegree int32 `json:"focus_degree"`
 }

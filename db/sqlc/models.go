@@ -11,8 +11,8 @@ import (
 type Goalperday struct {
 	ID        int64     `json:"id"`
 	UserID    int64     `json:"user_id"`
+	TypeID    int64     `json:"type_id"`
 	Pomonum   int32     `json:"pomonum"`
-	TypeID    int32     `json:"type_id"`
 	CreatedAt time.Time `json:"created_at"`
 	ChangedAt time.Time `json:"changed_at"`
 }
@@ -20,7 +20,7 @@ type Goalperday struct {
 type Pomodoro struct {
 	ID          int64     `json:"id"`
 	UserID      int64     `json:"user_id"`
-	TypeID      int32     `json:"type_id"`
+	TypeID      int64     `json:"type_id"`
 	TaskID      int64     `json:"task_id"`
 	FocusDegree int32     `json:"focus_degree"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -38,7 +38,7 @@ type Task struct {
 }
 
 type Type struct {
-	ID                int32  `json:"id"`
+	ID                int64  `json:"id"`
 	UserID            int64  `json:"user_id"`
 	Name              string `json:"name"`
 	Color             string `json:"color"`
