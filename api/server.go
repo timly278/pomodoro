@@ -42,8 +42,9 @@ func (server *Server) Setup() {
 
 	authRoutes := router.Group("/")
 	authRoutes.Use(middleware.EnsureLoggedIn(server.tokenMaker))
-	authRoutes.POST("/dosomething/:num", server.Dosomething)
 	authRoutes.POST("/logout", server.UserLogout)
+	authRoutes.POST("/dosomething/:num", server.Dosomething)
+	
 
 	server.router = router
 }

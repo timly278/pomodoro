@@ -5,6 +5,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -18,12 +19,12 @@ type Goalperday struct {
 }
 
 type Pomodoro struct {
-	ID          int64     `json:"id"`
-	UserID      int64     `json:"user_id"`
-	TypeID      int64     `json:"type_id"`
-	TaskID      int64     `json:"task_id"`
-	FocusDegree int32     `json:"focus_degree"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          int64         `json:"id"`
+	UserID      int64         `json:"user_id"`
+	TypeID      int64         `json:"type_id"`
+	TaskID      sql.NullInt64 `json:"task_id"`
+	FocusDegree int32         `json:"focus_degree"`
+	CreatedAt   time.Time     `json:"created_at"`
 }
 
 type Task struct {

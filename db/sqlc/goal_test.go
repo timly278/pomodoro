@@ -29,7 +29,7 @@ func createNewPomoGoal(t *testing.T) Goalperday {
 func TestCreateNewGoal(t *testing.T) {
 	newGoal := createNewPomoGoal(t)
 	params := CreateNewGoalParams{
-		UserID:  newGoal.ID,
+		UserID:  newGoal.UserID,
 		Pomonum: int32(util.RandomInt(0, 10)),
 		TypeID:  newGoal.TypeID,
 	}

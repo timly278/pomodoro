@@ -7,9 +7,41 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
 
-const createPomodoro = `-- name: CreatePomodoro :one
+const createPomodoroWithNoTask = `-- name: CreatePomodoroWithNoTask :one
+INSERT INTO pomodoros (
+  user_id,
+  type_id,
+  focus_degree
+) VALUES (
+  $1, $2, $3
+) RETURNING id, user_id, type_id, task_id, focus_degree, created_at
+`
+
+type CreatePomodoroWithNoTaskParams struct {
+	UserID      int64 `json:"user_id"`
+	TypeID      int64 `json:"type_id"`
+	FocusDegree int32 `json:"focus_degree"`
+}
+
+func (q *Queries) CreatePomodoroWithNoTask(ctx context.Context, arg CreatePomodoroWithNoTaskParams) (Pomodoro, error) {
+	row := q.db.QueryRowContext(ctx, createPomodoroWithNoTask, arg.UserID, arg.TypeID, arg.FocusDegree)
+	var i Pomodoro
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TypeID,
+		&i.TaskID,
+		&i.FocusDegree,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const createPomodoroWithTask = `-- name: CreatePomodoroWithTask :one
 INSERT INTO pomodoros (
   user_id,
   type_id,
@@ -20,15 +52,15 @@ INSERT INTO pomodoros (
 ) RETURNING id, user_id, type_id, task_id, focus_degree, created_at
 `
 
-type CreatePomodoroParams struct {
-	UserID      int64 `json:"user_id"`
-	TypeID      int64 `json:"type_id"`
-	TaskID      int64 `json:"task_id"`
-	FocusDegree int32 `json:"focus_degree"`
+type CreatePomodoroWithTaskParams struct {
+	UserID      int64         `json:"user_id"`
+	TypeID      int64         `json:"type_id"`
+	TaskID      sql.NullInt64 `json:"task_id"`
+	FocusDegree int32         `json:"focus_degree"`
 }
 
-func (q *Queries) CreatePomodoro(ctx context.Context, arg CreatePomodoroParams) (Pomodoro, error) {
-	row := q.db.QueryRowContext(ctx, createPomodoro,
+func (q *Queries) CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoroWithTaskParams) (Pomodoro, error) {
+	row := q.db.QueryRowContext(ctx, createPomodoroWithTask,
 		arg.UserID,
 		arg.TypeID,
 		arg.TaskID,
@@ -44,6 +76,46 @@ func (q *Queries) CreatePomodoro(ctx context.Context, arg CreatePomodoroParams) 
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const getPomodoroByDate = `-- name: GetPomodoroByDate :many
+SELECT id, user_id, type_id, task_id, focus_degree, created_at FROM pomodoros
+WHERE (created_at::DATE) = $2::DATE AND user_id = $1
+`
+
+type GetPomodoroByDateParams struct {
+	UserID      int64     `json:"user_id"`
+	Createddate time.Time `json:"createddate"`
+}
+
+func (q *Queries) GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]Pomodoro, error) {
+	rows, err := q.db.QueryContext(ctx, getPomodoroByDate, arg.UserID, arg.Createddate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Pomodoro{}
+	for rows.Next() {
+		var i Pomodoro
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.TypeID,
+			&i.TaskID,
+			&i.FocusDegree,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getPomodoroByUserId = `-- name: GetPomodoroByUserId :many

@@ -12,9 +12,11 @@ type Querier interface {
 	CreateNewGoal(ctx context.Context, arg CreateNewGoalParams) (Goalperday, error)
 	CreateNewTask(ctx context.Context, arg CreateNewTaskParams) (Task, error)
 	CreateNewType(ctx context.Context, arg CreateNewTypeParams) (Type, error)
-	CreatePomodoro(ctx context.Context, arg CreatePomodoroParams) (Pomodoro, error)
+	CreatePomodoroWithNoTask(ctx context.Context, arg CreatePomodoroWithNoTaskParams) (Pomodoro, error)
+	CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoroWithTaskParams) (Pomodoro, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteGoal(ctx context.Context, id int64) error
+	GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]Pomodoro, error)
 	GetPomodoroByUserId(ctx context.Context, userID int64) ([]Pomodoro, error)
 	GetTaskById(ctx context.Context, id int64) (Type, error)
 	GetTypeById(ctx context.Context, id int64) (Type, error)

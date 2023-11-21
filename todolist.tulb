@@ -1,2 +1,6 @@
 - implement refresh token and verified email
-- 
+- How to achieve https or SSL 
+
+// functioning at db layer:
+- how many pomodoro per task
+- list tasks by status: done, in-progress, ...
