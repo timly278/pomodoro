@@ -13,11 +13,9 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users (
   username,
   hashed_password,
-  email,
-  alarm_sound,
-  repeat_alarm
+  email
 ) VALUES (
-  $1, $2, $3, $4, $5
+  $1, $2, $3
 ) RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm
 `
 
@@ -25,18 +23,10 @@ type CreateUserParams struct {
 	Username       string `json:"username"`
 	HashedPassword string `json:"hashed_password"`
 	Email          string `json:"email"`
-	AlarmSound     string `json:"alarm_sound"`
-	RepeatAlarm    int32  `json:"repeat_alarm"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
-		arg.Username,
-		arg.HashedPassword,
-		arg.Email,
-		arg.AlarmSound,
-		arg.RepeatAlarm,
-	)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.HashedPassword, arg.Email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -79,6 +69,43 @@ WHERE id = $1 LIMIT 1
 
 func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.HashedPassword,
+		&i.Email,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
+	)
+	return i, err
+}
+
+const updateUserSetting = `-- name: UpdateUserSetting :one
+UPDATE users
+SET   username = $2,
+      alarm_sound = $3,
+      repeat_alarm = $4
+WHERE id = $1
+RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm
+`
+
+type UpdateUserSettingParams struct {
+	ID          int64  `json:"id"`
+	Username    string `json:"username"`
+	AlarmSound  string `json:"alarm_sound"`
+	RepeatAlarm int32  `json:"repeat_alarm"`
+}
+
+func (q *Queries) UpdateUserSetting(ctx context.Context, arg UpdateUserSettingParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserSetting,
+		arg.ID,
+		arg.Username,
+		arg.AlarmSound,
+		arg.RepeatAlarm,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,

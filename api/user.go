@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"net/http"
 	db "pomodoro/db/sqlc"
+	"pomodoro/shared/middleware"
 	"pomodoro/shared/response"
 	"pomodoro/util"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -105,7 +107,7 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
+	accessToken, err := server.tokenMaker.CreateToken(strconv.FormatInt(user.ID, 10), server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		return
@@ -123,7 +125,7 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 
 }
 
-// UserLogout
+// TODO: UserLogout
 func (server *Server) UserLogout(ctx *gin.Context) {
 	// create blacklist to store logged out token
 	// implement blacklist on Redis to take advantage of speed
@@ -131,4 +133,40 @@ func (server *Server) UserLogout(ctx *gin.Context) {
 	// if you use oauth to login with google for example, you dont need to let user logout
 	// todo: add login using oauth2.0
 	// todo: do we really need to implement setUserStatus middleware handler?
+}
+
+type updateUserSettingRequest struct {
+	Username    string `json:"username" binding:"required,alphanum"`
+	AlarmSound  string `json:"alarm_sound" binding:"required"`
+	RepeatAlarm int32  `json:"repeat_alarm" binding:"required,alphanum,min=1,max=10"`
+}
+
+func (server *Server) UpdateUserSetting(ctx *gin.Context) {
+	var settingRequest updateUserSettingRequest
+
+	err := ctx.ShouldBindJSON(&settingRequest)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		return
+	}
+
+	user, err := server.store.UpdateUserSetting(ctx, db.UpdateUserSettingParams{
+		ID:          getUserId(ctx),
+		Username:    settingRequest.Username,
+		AlarmSound:  settingRequest.AlarmSound,
+		RepeatAlarm: settingRequest.RepeatAlarm,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		return
+	}
+	rsp := newUserResponse(user)
+	ctx.JSON(http.StatusOK, response.Response{
+		Message: "update setting successfully",
+		Data:    rsp,
+	})
+}
+
+func getUserId(ctx *gin.Context) int64 {
+	return ctx.MustGet(middleware.AUTHORIZATION_USERID_KEY).(int64)
 }

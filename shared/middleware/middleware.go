@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"pomodoro/auth"
 	"pomodoro/shared/response"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ const (
 	AUTHORIZATION_HEADER_KEY  = "authorization"
 	AUTHORIZATION_TYPE_BEARER = "bearer"
 	AUTHORIZATION_PAYLOAD_KEY = "authorization_payload"
+	AUTHORIZATION_USERID_KEY  = "userid"
 )
 
 // EnsureLoggedIn requires user authenticated
@@ -26,7 +28,12 @@ func EnsureLoggedIn(tokenMaker auth.TokenMaker) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
 
+		i, err := strconv.Atoi(payload.RegisteredClaims.ID)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+		}
 		ctx.Set(AUTHORIZATION_PAYLOAD_KEY, payload)
+		ctx.Set(AUTHORIZATION_USERID_KEY, int64(i))
 		ctx.Next()
 	}
 }

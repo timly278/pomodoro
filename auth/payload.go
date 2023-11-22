@@ -12,7 +12,7 @@ type Payload struct {
 	jwt.RegisteredClaims
 }
 
-func NewPayload(username string, duration time.Duration) (*Payload, error) {
+func NewPayload(userid string, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 	payload := Payload{
 		tokenID,
 		jwt.RegisteredClaims{
-			Issuer:    username,
+			ID:    userid,
 			IssuedAt:  jwt.NewNumericDate(issueAt),
 			ExpiresAt: jwt.NewNumericDate(expiredAt),
 		},

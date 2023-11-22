@@ -29,6 +29,7 @@ type Querier interface {
 	UpdateTaskConfig(ctx context.Context, arg UpdateTaskConfigParams) (Task, error)
 	UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) (Task, error)
 	UpdateTypeById(ctx context.Context, arg UpdateTypeByIdParams) (Type, error)
+	UpdateUserSetting(ctx context.Context, arg UpdateUserSettingParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

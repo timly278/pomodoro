@@ -23,8 +23,8 @@ func NewJwtTokenMaker(secretKey string) (*JwtTokenMaker, error) {
 }
 
 // method to create token
-func (maker *JwtTokenMaker) CreateToken(name string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(name, duration)
+func (maker *JwtTokenMaker) CreateToken(id string, duration time.Duration) (string, error) {
+	payload, err := NewPayload(id, duration)
 	if err != nil {
 		return "", errors.New("cannot create token")
 	}

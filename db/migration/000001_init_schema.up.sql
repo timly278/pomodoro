@@ -5,20 +5,20 @@ CREATE TABLE "users" (
   "email" varchar UNIQUE NOT NULL,
   "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "alarm_sound" varchar NOT NULL,
-  "repeat_alarm" int NOT NULL
+  "alarm_sound" varchar NOT NULL DEFAULT ('Kitchen'),
+  "repeat_alarm" int NOT NULL DEFAULT 1
 );
 
 CREATE TABLE "types" (
   "id" bigserial NOT NULL PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "name" varchar(50) NOT NULL,
-  "color" varchar NOT NULL,
-  "duration" int NOT NULL,
-  "shortbreak" int NOT NULL,
-  "longbreak" int NOT NULL,
-  "longbreakinterval" int NOT NULL,
-  "autostart_break" boolean NOT NULL
+  "color" varchar NOT  NULL DEFAULT '#fc5603',
+  "duration" int NOT NULL DEFAULT 25,
+  "shortbreak" int NOT NULL DEFAULT 5,
+  "longbreak" int NOT NULL DEFAULT 15,
+  "longbreakinterval" int NOT NULL DEFAULT 4,
+  "autostart_break" boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE "pomodoros" (
