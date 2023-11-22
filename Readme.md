@@ -51,4 +51,6 @@
 
 ## need to be tested:
 - UpdateUserSetting
-- 
+- CreateNewPomoType
+- ListPomoType
+- UpdateType

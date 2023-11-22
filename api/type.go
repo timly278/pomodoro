@@ -11,7 +11,7 @@ import (
 
 type createTypeRequest struct {
 	Name              string `json:"name" binding:"required,alphanum"`
-	Color             string `json:"color" binding:"required,rgb"`
+	Color             string `json:"color" binding:"required"`
 	Duration          int32  `json:"duration" binding:"required,min=1"`
 	Shortbreak        int32  `json:"shortbreak" binding:"required,min=1"`
 	Longbreak         int32  `json:"longbreak" binding:"required,min=1"`

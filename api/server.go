@@ -49,6 +49,8 @@ func (server *Server) Setup() {
 	authRoutes.POST("/api/types", server.CreateNewPomoType)
 	authRoutes.GET("/api/types", server.ListPomoType)
 	authRoutes.PUT("/api/types/:id", server.UpdateType)
+	
+	authRoutes.POST("/api/pomodoros", server.CreateNewPomodoro)
 
 	server.router = router
 }
