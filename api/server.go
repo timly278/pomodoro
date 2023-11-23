@@ -44,13 +44,14 @@ func (server *Server) Setup() {
 	authRoutes.Use(middleware.EnsureLoggedIn(server.tokenMaker))
 	authRoutes.POST("/logout", server.UserLogout)
 	authRoutes.POST("/dosomething/:num", server.Dosomething)
-	
+
 	authRoutes.PUT("/api/users", server.UpdateUserSetting)
 	authRoutes.POST("/api/types", server.CreateNewPomoType)
 	authRoutes.GET("/api/types", server.ListPomoType)
 	authRoutes.PUT("/api/types/:id", server.UpdateType)
-	
+
 	authRoutes.POST("/api/pomodoros", server.CreateNewPomodoro)
+	authRoutes.GET("/api/report", server.)
 
 	server.router = router
 }

@@ -52,7 +52,7 @@ func (q *Queries) CreateNewTask(ctx context.Context, arg CreateNewTaskParams) (T
 }
 
 const getTaskById = `-- name: GetTaskById :one
-SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break FROM types
+SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday FROM types
 WHERE id = $1 LIMIT 1
 `
 
@@ -69,6 +69,7 @@ func (q *Queries) GetTaskById(ctx context.Context, id int64) (Type, error) {
 		&i.Longbreak,
 		&i.Longbreakinterval,
 		&i.AutostartBreak,
+		&i.Goalperday,
 	)
 	return i, err
 }

@@ -13,6 +13,7 @@ func createNewPomoType(t *testing.T, user User) Type {
 		UserID:            user.ID,
 		Name:              util.RandomString(6),
 		Color:             util.RandomColor(),
+		Goalperday:        int32(util.RandomInt(2, 10)),
 		Duration:          int32(util.RandomInt(10, 45)),
 		Shortbreak:        int32(util.RandomInt(2, 10)),
 		Longbreak:         int32(util.RandomInt(5, 20)),
@@ -25,6 +26,7 @@ func createNewPomoType(t *testing.T, user User) Type {
 	require.Equal(t, user.ID, newType.UserID)
 	require.Equal(t, params.Name, newType.Name)
 	require.Equal(t, params.Color, newType.Color)
+	require.Equal(t, params.Goalperday, newType.Goalperday)
 	require.Equal(t, params.Duration, newType.Duration)
 	require.Equal(t, params.Shortbreak, newType.Shortbreak)
 	require.Equal(t, params.Longbreak, newType.Longbreak)

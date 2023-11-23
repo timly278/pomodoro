@@ -9,23 +9,23 @@ import (
 )
 
 type Querier interface {
-	CreateNewGoal(ctx context.Context, arg CreateNewGoalParams) (Goalperday, error)
 	CreateNewTask(ctx context.Context, arg CreateNewTaskParams) (Task, error)
 	CreateNewType(ctx context.Context, arg CreateNewTypeParams) (Type, error)
 	CreatePomodoroWithNoTask(ctx context.Context, arg CreatePomodoroWithNoTaskParams) (Pomodoro, error)
 	CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoroWithTaskParams) (Pomodoro, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	DeleteGoal(ctx context.Context, id int64) error
-	GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]Pomodoro, error)
+	GetDaysAccessedNumber(ctx context.Context, userID int64) (int64, error)
+	GetDaysAccessedNumberInMonth(ctx context.Context, arg GetDaysAccessedNumberInMonthParams) (int64, error)
+	// todo: GetDaysAccessedNumberInYear :one
+	GetMinutesFocusedInMonth(ctx context.Context, arg GetMinutesFocusedInMonthParams) (int64, error)
+	GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]GetPomodoroByDateRow, error)
 	GetPomodoroByUserId(ctx context.Context, userID int64) ([]Pomodoro, error)
 	GetTaskById(ctx context.Context, id int64) (Type, error)
 	GetTypeById(ctx context.Context, id int64) (Type, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
-	ListGoals(ctx context.Context, userID int64) ([]Goalperday, error)
 	ListTasks(ctx context.Context, userID int64) ([]Task, error)
 	ListTypes(ctx context.Context, userID int64) ([]Type, error)
-	UpdateGoal(ctx context.Context, arg UpdateGoalParams) (Goalperday, error)
 	UpdateTaskConfig(ctx context.Context, arg UpdateTaskConfigParams) (Task, error)
 	UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) (Task, error)
 	UpdateTypeById(ctx context.Context, arg UpdateTypeByIdParams) (Type, error)

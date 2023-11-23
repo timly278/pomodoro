@@ -9,15 +9,6 @@ import (
 	"time"
 )
 
-type Goalperday struct {
-	ID        int64     `json:"id"`
-	UserID    int64     `json:"user_id"`
-	TypeID    int64     `json:"type_id"`
-	Pomonum   int32     `json:"pomonum"`
-	CreatedAt time.Time `json:"created_at"`
-	ChangedAt time.Time `json:"changed_at"`
-}
-
 type Pomodoro struct {
 	ID          int64         `json:"id"`
 	UserID      int64         `json:"user_id"`
@@ -48,6 +39,7 @@ type Type struct {
 	Longbreak         int32  `json:"longbreak"`
 	Longbreakinterval int32  `json:"longbreakinterval"`
 	AutostartBreak    bool   `json:"autostart_break"`
+	Goalperday        int32  `json:"goalperday"`
 }
 
 type User struct {

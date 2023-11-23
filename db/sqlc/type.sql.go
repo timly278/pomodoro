@@ -14,20 +14,22 @@ INSERT INTO types (
   user_id,
   name,
   color,
+  goalperday,
   duration,
   shortbreak,
   longbreak,
   longbreakinterval,
   autostart_break
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8
-) RETURNING id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break
+  $1, $2, $3, $4, $5, $6, $7, $8, $9
+) RETURNING id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday
 `
 
 type CreateNewTypeParams struct {
 	UserID            int64  `json:"user_id"`
 	Name              string `json:"name"`
 	Color             string `json:"color"`
+	Goalperday        int32  `json:"goalperday"`
 	Duration          int32  `json:"duration"`
 	Shortbreak        int32  `json:"shortbreak"`
 	Longbreak         int32  `json:"longbreak"`
@@ -40,6 +42,7 @@ func (q *Queries) CreateNewType(ctx context.Context, arg CreateNewTypeParams) (T
 		arg.UserID,
 		arg.Name,
 		arg.Color,
+		arg.Goalperday,
 		arg.Duration,
 		arg.Shortbreak,
 		arg.Longbreak,
@@ -57,12 +60,13 @@ func (q *Queries) CreateNewType(ctx context.Context, arg CreateNewTypeParams) (T
 		&i.Longbreak,
 		&i.Longbreakinterval,
 		&i.AutostartBreak,
+		&i.Goalperday,
 	)
 	return i, err
 }
 
 const getTypeById = `-- name: GetTypeById :one
-SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break FROM types
+SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday FROM types
 WHERE id = $1 LIMIT 1
 `
 
@@ -79,12 +83,13 @@ func (q *Queries) GetTypeById(ctx context.Context, id int64) (Type, error) {
 		&i.Longbreak,
 		&i.Longbreakinterval,
 		&i.AutostartBreak,
+		&i.Goalperday,
 	)
 	return i, err
 }
 
 const listTypes = `-- name: ListTypes :many
-SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break FROM types
+SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday FROM types
 WHERE user_id = $1
 ORDER BY id
 `
@@ -108,6 +113,7 @@ func (q *Queries) ListTypes(ctx context.Context, userID int64) ([]Type, error) {
 			&i.Longbreak,
 			&i.Longbreakinterval,
 			&i.AutostartBreak,
+			&i.Goalperday,
 		); err != nil {
 			return nil, err
 		}
@@ -126,19 +132,21 @@ const updateTypeById = `-- name: UpdateTypeById :one
 UPDATE types
 SET name = $2,
     color = $3,
-    shortbreak = $4,
-    duration = $5,
-    longbreak = $6,
-    longbreakinterval = $7,
-    autostart_break = $8
+    goalperday = $4,
+    shortbreak = $5,
+    duration = $6,
+    longbreak = $7,
+    longbreakinterval = $8,
+    autostart_break = $9
 WHERE id = $1
-RETURNING id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break
+RETURNING id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday
 `
 
 type UpdateTypeByIdParams struct {
 	ID                int64  `json:"id"`
 	Name              string `json:"name"`
 	Color             string `json:"color"`
+	Goalperday        int32  `json:"goalperday"`
 	Shortbreak        int32  `json:"shortbreak"`
 	Duration          int32  `json:"duration"`
 	Longbreak         int32  `json:"longbreak"`
@@ -151,6 +159,7 @@ func (q *Queries) UpdateTypeById(ctx context.Context, arg UpdateTypeByIdParams) 
 		arg.ID,
 		arg.Name,
 		arg.Color,
+		arg.Goalperday,
 		arg.Shortbreak,
 		arg.Duration,
 		arg.Longbreak,
@@ -168,6 +177,7 @@ func (q *Queries) UpdateTypeById(ctx context.Context, arg UpdateTypeByIdParams) 
 		&i.Longbreak,
 		&i.Longbreakinterval,
 		&i.AutostartBreak,
+		&i.Goalperday,
 	)
 	return i, err
 }

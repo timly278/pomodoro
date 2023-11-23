@@ -68,34 +68,23 @@ func TestGetPomodoroByDate(t *testing.T) {
 	user := createNewUser(t)
 	pomotype := createNewPomoType(t, user)
 	n := 5
+
+	var pomodoros []Pomodoro
 	for i := 0; i < n; i++ {
-		createPomoWithNoTask(t, user.ID, pomotype.ID)
+		pomodoros = append(pomodoros, createPomoWithNoTask(t, user.ID, pomotype.ID))
 	}
 
 	params := GetPomodoroByDateParams{
-		UserID:      user.ID,
-		Createddate: time.Now(),
+		UserID:    user.ID,
+		Limit:     int32(n),
+		Offset:    0,
+		QueryDate: time.Now(),
 	}
-	pomodoros, err := testQueries.GetPomodoroByDate(context.Background(), params)
+	pomoRows, err := testQueries.GetPomodoroByDate(context.Background(), params)
 	require.NoError(t, err)
-	require.Equal(t, n, len(pomodoros))
+	require.Equal(t, n, len(pomoRows))
 	for i := 0; i < n; i++ {
-		yearp, monthp, dayp := params.Createddate.Date()
-		year, month, day := pomodoros[i].CreatedAt.Date()
-
-		require.Equal(t, yearp, year)
-		require.Equal(t, monthp, month)
-		require.Equal(t, dayp, day)
+		require.Equal(t, pomotype.Goalperday, pomoRows[i].Goalperday)
+		require.Equal(t, pomodoros[i].FocusDegree, pomoRows[i].FocusDegree)
 	}
 }
-
-// FormCreatedDate was deprecated
-// func FormCreatedDate(year int, month time.Month, day int) string {
-// 	dateString := make([]byte, 1)
-// 	dateString = append(dateString, []byte(strconv.Itoa(year))...)
-// 	dateString = append(dateString, '-')
-// 	dateString = append(dateString, []byte(strconv.Itoa(int(month)))...)
-// 	dateString = append(dateString, '-')
-// 	dateString = append(dateString, []byte(strconv.Itoa(day))...)
-// 	return string(dateString)
-// }

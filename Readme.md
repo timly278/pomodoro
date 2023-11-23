@@ -49,7 +49,7 @@
 - /api/goals/
 
 
-## need to be tested:
+## Not yet and need to be tested:
 - UpdateUserSetting
 - CreateNewPomoType
 - ListPomoType

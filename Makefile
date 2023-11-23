@@ -22,9 +22,12 @@ migrateup:
 migratedown1:
 	migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/pomodoro?sslmode=disable" -verbose down 1
 
+migrateup1:
+	migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/pomodoro?sslmode=disable" -verbose up 1
+
 sqlc:
 	sqlc generate
 
 server:
 	go run ./cmd/main.go
-.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 sqlc server
+.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc server

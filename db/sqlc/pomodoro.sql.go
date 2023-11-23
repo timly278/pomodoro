@@ -79,31 +79,50 @@ func (q *Queries) CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoro
 }
 
 const getPomodoroByDate = `-- name: GetPomodoroByDate :many
-SELECT id, user_id, type_id, task_id, focus_degree, created_at FROM pomodoros
-WHERE (created_at::DATE) = $2::DATE AND user_id = $1
+SELECT t.goalperday, p.focus_degree, t.name as type_name, t.color as type_color, t.duration
+FROM pomodoros p, types t 
+WHERE t.id = p.type_id
+AND (p.created_at::DATE) = $4::DATE AND p.user_id = $1
+ORDER BY p.type_id
+LIMIT $2
+OFFSET $3
 `
 
 type GetPomodoroByDateParams struct {
-	UserID      int64     `json:"user_id"`
-	Createddate time.Time `json:"createddate"`
+	UserID    int64     `json:"user_id"`
+	Limit     int32     `json:"limit"`
+	Offset    int32     `json:"offset"`
+	QueryDate time.Time `json:"query_date"`
 }
 
-func (q *Queries) GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]Pomodoro, error) {
-	rows, err := q.db.QueryContext(ctx, getPomodoroByDate, arg.UserID, arg.Createddate)
+type GetPomodoroByDateRow struct {
+	Goalperday  int32  `json:"goalperday"`
+	FocusDegree int32  `json:"focus_degree"`
+	TypeName    string `json:"type_name"`
+	TypeColor   string `json:"type_color"`
+	Duration    int32  `json:"duration"`
+}
+
+func (q *Queries) GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]GetPomodoroByDateRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPomodoroByDate,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+		arg.QueryDate,
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Pomodoro{}
+	items := []GetPomodoroByDateRow{}
 	for rows.Next() {
-		var i Pomodoro
+		var i GetPomodoroByDateRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.TypeID,
-			&i.TaskID,
+			&i.Goalperday,
 			&i.FocusDegree,
-			&i.CreatedAt,
+			&i.TypeName,
+			&i.TypeColor,
+			&i.Duration,
 		); err != nil {
 			return nil, err
 		}

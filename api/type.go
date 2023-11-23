@@ -12,6 +12,7 @@ import (
 type createTypeRequest struct {
 	Name              string `json:"name" binding:"required,alphanum"`
 	Color             string `json:"color" binding:"required"`
+	Goalperday        int32  `json:"goal_per_day" binding:"required,min=1"`
 	Duration          int32  `json:"duration" binding:"required,min=1"`
 	Shortbreak        int32  `json:"shortbreak" binding:"required,min=1"`
 	Longbreak         int32  `json:"longbreak" binding:"required,min=1"`
@@ -31,6 +32,7 @@ func (server *Server) CreateNewPomoType(ctx *gin.Context) {
 		UserID:            getUserId(ctx),
 		Name:              typeRequest.Name,
 		Color:             typeRequest.Color,
+		Goalperday:        typeRequest.Goalperday,
 		Duration:          typeRequest.Duration,
 		Shortbreak:        typeRequest.Shortbreak,
 		Longbreak:         typeRequest.Longbreak,
@@ -76,6 +78,7 @@ func (server *Server) UpdateType(ctx *gin.Context) {
 		ID:                typeId,
 		Name:              typeRequest.Name,
 		Color:             typeRequest.Color,
+		Goalperday:        typeRequest.Goalperday,
 		Duration:          typeRequest.Duration,
 		Shortbreak:        typeRequest.Shortbreak,
 		Longbreak:         typeRequest.Longbreak,
