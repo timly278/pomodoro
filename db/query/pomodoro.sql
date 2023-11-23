@@ -22,7 +22,7 @@ SELECT * FROM pomodoros
 WHERE user_id = $1 LIMIT 1;
 
 -- name: GetPomodoroByDate :many
-SELECT t.goalperday, p.focus_degree, t.name as type_name, t.color as type_color, t.duration
+SELECT t.id as type_id, p.focus_degree
 FROM pomodoros p, types t 
 WHERE t.id = p.type_id
 AND (p.created_at::DATE) = sqlc.arg(query_date)::DATE AND p.user_id = $1

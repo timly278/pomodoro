@@ -39,14 +39,15 @@
         
     - GET("/api/report/month/:id")
         list pomo by month
-            
+    - GET("/api/report/:date")
+        list pomo by date: one specific day
+       
 - /api/types/   - newType, updateType, deleteType
         GET  - list all available types
         POST - create a new type
         PUT  - update type
             /api/types/:id
         
-- /api/goals/
 
 
 ## Not yet and need to be tested:

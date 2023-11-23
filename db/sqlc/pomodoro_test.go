@@ -84,7 +84,7 @@ func TestGetPomodoroByDate(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, n, len(pomoRows))
 	for i := 0; i < n; i++ {
-		require.Equal(t, pomotype.Goalperday, pomoRows[i].Goalperday)
+		require.Equal(t, pomotype.ID, pomoRows[i].TypeID)
 		require.Equal(t, pomodoros[i].FocusDegree, pomoRows[i].FocusDegree)
 	}
 }

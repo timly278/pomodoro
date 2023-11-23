@@ -14,13 +14,13 @@ type Querier interface {
 	CreatePomodoroWithNoTask(ctx context.Context, arg CreatePomodoroWithNoTaskParams) (Pomodoro, error)
 	CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoroWithTaskParams) (Pomodoro, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	GetDaysAccessedNumber(ctx context.Context, userID int64) (int64, error)
-	GetDaysAccessedNumberInMonth(ctx context.Context, arg GetDaysAccessedNumberInMonthParams) (int64, error)
-	// todo: GetDaysAccessedNumberInYear :one
+	GetDaysAccessedInMonth(ctx context.Context, arg GetDaysAccessedInMonthParams) (int64, error)
+	// todo: GetDaysAccessedInYear :one
 	GetMinutesFocusedInMonth(ctx context.Context, arg GetMinutesFocusedInMonthParams) (int64, error)
 	GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]GetPomodoroByDateRow, error)
 	GetPomodoroByUserId(ctx context.Context, userID int64) ([]Pomodoro, error)
 	GetTaskById(ctx context.Context, id int64) (Type, error)
+	GetTotalDaysAccessed(ctx context.Context, userID int64) (int64, error)
 	GetTypeById(ctx context.Context, id int64) (Type, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)

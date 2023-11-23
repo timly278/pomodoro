@@ -9,23 +9,7 @@ import (
 	"context"
 )
 
-const getDaysAccessedNumber = `-- name: GetDaysAccessedNumber :one
-SELECT count(*) as count FROM
-(
-  SELECT (created_at::DATE) as days
-  FROM pomodoros where user_id = $1 
-  GROUP BY (created_at::DATE)
-) as x LIMIT 1
-`
-
-func (q *Queries) GetDaysAccessedNumber(ctx context.Context, userID int64) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getDaysAccessedNumber, userID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const getDaysAccessedNumberInMonth = `-- name: GetDaysAccessedNumberInMonth :one
+const getDaysAccessedInMonth = `-- name: GetDaysAccessedInMonth :one
 SELECT count(*) FROM
 (
     SELECT EXTRACT(day FROM created_at) as day FROM pomodoros 
@@ -35,13 +19,13 @@ SELECT count(*) FROM
 ) as x LIMIT 1
 `
 
-type GetDaysAccessedNumberInMonthParams struct {
+type GetDaysAccessedInMonthParams struct {
 	UserID  int64 `json:"user_id"`
 	MonthID int32 `json:"month_id"`
 }
 
-func (q *Queries) GetDaysAccessedNumberInMonth(ctx context.Context, arg GetDaysAccessedNumberInMonthParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getDaysAccessedNumberInMonth, arg.UserID, arg.MonthID)
+func (q *Queries) GetDaysAccessedInMonth(ctx context.Context, arg GetDaysAccessedInMonthParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getDaysAccessedInMonth, arg.UserID, arg.MonthID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -64,10 +48,26 @@ type GetMinutesFocusedInMonthParams struct {
 	MonthID int32 `json:"month_id"`
 }
 
-// todo: GetDaysAccessedNumberInYear :one
+// todo: GetDaysAccessedInYear :one
 func (q *Queries) GetMinutesFocusedInMonth(ctx context.Context, arg GetMinutesFocusedInMonthParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, getMinutesFocusedInMonth, arg.UserID, arg.MonthID)
 	var minutefocused int64
 	err := row.Scan(&minutefocused)
 	return minutefocused, err
+}
+
+const getTotalDaysAccessed = `-- name: GetTotalDaysAccessed :one
+SELECT count(*) as count FROM
+(
+  SELECT (created_at::DATE) as days
+  FROM pomodoros where user_id = $1 
+  GROUP BY (created_at::DATE)
+) as x LIMIT 1
+`
+
+func (q *Queries) GetTotalDaysAccessed(ctx context.Context, userID int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getTotalDaysAccessed, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }

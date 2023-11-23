@@ -79,7 +79,7 @@ func (q *Queries) CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoro
 }
 
 const getPomodoroByDate = `-- name: GetPomodoroByDate :many
-SELECT t.goalperday, p.focus_degree, t.name as type_name, t.color as type_color, t.duration
+SELECT t.id as type_id, p.focus_degree
 FROM pomodoros p, types t 
 WHERE t.id = p.type_id
 AND (p.created_at::DATE) = $4::DATE AND p.user_id = $1
@@ -96,11 +96,8 @@ type GetPomodoroByDateParams struct {
 }
 
 type GetPomodoroByDateRow struct {
-	Goalperday  int32  `json:"goalperday"`
-	FocusDegree int32  `json:"focus_degree"`
-	TypeName    string `json:"type_name"`
-	TypeColor   string `json:"type_color"`
-	Duration    int32  `json:"duration"`
+	TypeID      int64 `json:"type_id"`
+	FocusDegree int32 `json:"focus_degree"`
 }
 
 func (q *Queries) GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]GetPomodoroByDateRow, error) {
@@ -117,13 +114,7 @@ func (q *Queries) GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDatePa
 	items := []GetPomodoroByDateRow{}
 	for rows.Next() {
 		var i GetPomodoroByDateRow
-		if err := rows.Scan(
-			&i.Goalperday,
-			&i.FocusDegree,
-			&i.TypeName,
-			&i.TypeColor,
-			&i.Duration,
-		); err != nil {
+		if err := rows.Scan(&i.TypeID, &i.FocusDegree); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

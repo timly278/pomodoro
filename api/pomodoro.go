@@ -5,6 +5,7 @@ import (
 	"net/http"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -57,3 +58,40 @@ func (server *Server) createPomodoro(ctx *gin.Context, pomoRequest createPomodor
 	return
 }
 
+// ListPomoType should receive page_id and page_size?
+
+// GET("/api/report/month/:id")
+// response the whole data of the specified month
+func (server *Server) ListPomoByMonth(ctx *gin.Context) {
+	var rsp []db.GetPomodoroByDateRow
+
+	monthID, err := getObjectId(ctx)
+	if err != nil || (monthID > 12 || monthID < 1) {
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		return
+	}
+	userID := getUserId(ctx)
+	present := time.Now()
+
+
+	for i := range time.
+	params := db.GetPomodoroByDateParams{
+		UserID: userID,
+		Limit: 30,
+		Offset: 0,
+		QueryDate: time.Date(present.Year(), time.Month(monthID), 1, 0,0,0,0,present.Location()),
+	}
+	
+	pomo, err := server.store.GetPomodoroByDate(ctx, params)
+	if err != nil {
+		if err == sql.ErrNoRows {
+
+		}
+	}
+
+}
+
+// GET("/api/report/:date")
+func (server *Server) ListPomoByDate(ctx *gin.Context) {
+
+}
