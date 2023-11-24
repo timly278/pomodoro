@@ -24,7 +24,7 @@ func (server *Server) CreateNewPomoType(ctx *gin.Context) {
 	var typeRequest createTypeRequest
 	err := ctx.ShouldBindJSON(&typeRequest)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
@@ -64,11 +64,11 @@ func (server *Server) UpdateType(ctx *gin.Context) {
 	var typeRequest createTypeRequest
 	err := ctx.ShouldBindJSON(&typeRequest)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
-	typeId, err := getObjectId(ctx)
+	typeId, err := getNumericObjectParam(ctx, "id")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return

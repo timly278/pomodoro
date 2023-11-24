@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"net/http"
 	db "pomodoro/db/sqlc"
-	"pomodoro/shared/middleware"
 	"pomodoro/shared/response"
 	"pomodoro/util"
 	"strconv"
@@ -42,7 +41,7 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 	var newUser createUserRequest
 	err := ctx.ShouldBindJSON(&newUser)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
@@ -87,7 +86,7 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&userLogin)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
@@ -146,7 +145,7 @@ func (server *Server) UpdateUserSetting(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&settingRequest)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
@@ -165,8 +164,4 @@ func (server *Server) UpdateUserSetting(ctx *gin.Context) {
 		Message: "update setting successfully",
 		Data:    rsp,
 	})
-}
-
-func getUserId(ctx *gin.Context) int64 {
-	return ctx.MustGet(middleware.AUTHORIZATION_USERID_KEY).(int64)
 }

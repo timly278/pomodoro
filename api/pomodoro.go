@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
@@ -21,7 +22,7 @@ func (server *Server) CreateNewPomodoro(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&pomoRequest)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorMultiResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
@@ -63,35 +64,85 @@ func (server *Server) createPomodoro(ctx *gin.Context, pomoRequest createPomodor
 // GET("/api/report/month/:id")
 // response the whole data of the specified month
 func (server *Server) ListPomoByMonth(ctx *gin.Context) {
-	var rsp []db.GetPomodoroByDateRow
 
-	monthID, err := getObjectId(ctx)
+	monthID, err := getNumericObjectParam(ctx, "month")
 	if err != nil || (monthID > 12 || monthID < 1) {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
-	userID := getUserId(ctx)
 	present := time.Now()
+	//TODO: update to be able to solve any year
+	date := time.Date(present.Year(), time.Month(monthID), 0, 0, 0, 0, 0, present.Location())
+	numberOfDate := date.Day()
+	rsp := make([][]db.GetPomodoroByDateRow, numberOfDate)
 
+	userID := getUserId(ctx)
 
-	for i := range time.
-	params := db.GetPomodoroByDateParams{
-		UserID: userID,
-		Limit: 30,
-		Offset: 0,
-		QueryDate: time.Date(present.Year(), time.Month(monthID), 1, 0,0,0,0,present.Location()),
-	}
-	
-	pomo, err := server.store.GetPomodoroByDate(ctx, params)
-	if err != nil {
-		if err == sql.ErrNoRows {
-
+	// time.Date might get less efficient than forming a date string like: '2023-11-23'
+	for i := 0; i < numberOfDate; i++ {
+		date = date.AddDate(0, 0, 1)
+		params := db.GetPomodoroByDateParams{
+			UserID:    userID,
+			Limit:     30, //TODO: what if there are more than 30 pomodoros a day?
+			Offset:    0,
+			QueryDate: date,
 		}
+		pomo, err := server.store.GetPomodoroByDate(ctx, params)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// scan another day of the month
+				continue
+			}
+			ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+			return
+		}
+		rsp[i] = append(rsp[i], pomo...)
 	}
+
+	ctx.JSON(http.StatusOK, rsp)
 
 }
 
-// GET("/api/report/:date")
+type listPomoByDateRequest struct {
+	// NOTE: for using time validation here
+	// using `validate:"required,DateOnly"`
+	// or `validate:"required,rfc3339"`
+	// or `time_format:"2006-02-01"` is the same.
+
+	DateTime time.Time `form:"date_time" binding:"required" validate:"required,rfc3339"`
+	PageID   int32     `form:"page_id" binding:"required,min=1"`
+	PageSize int32     `form:"page_size" binding:"required,min=5,max=50"`
+}
+
 func (server *Server) ListPomoByDate(ctx *gin.Context) {
+
+	var pomoRequest listPomoByDateRequest
+	err := ctx.ShouldBindQuery(&pomoRequest)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		return
+	}
+	userID := getUserId(ctx)
+	dbQueryParams := db.GetPomodoroByDateParams{
+		UserID:    userID,
+		Limit:     pomoRequest.PageSize,
+		Offset:    (pomoRequest.PageID - 1) * pomoRequest.PageSize,
+		QueryDate: pomoRequest.DateTime,
+	}
+
+	pomos, err := server.store.GetPomodoroByDate(ctx, dbQueryParams)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, response.ErrorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.Response{
+		Message: fmt.Sprintf("%v", pomoRequest.DateTime),
+		Data:    pomos,
+	})
 
 }

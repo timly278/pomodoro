@@ -39,6 +39,7 @@
         
     - GET("/api/report/month/:id")
         list pomo by month
+
     - GET("/api/report/:date")
         list pomo by date: one specific day
        

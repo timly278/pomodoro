@@ -66,6 +66,7 @@ func TestCreatePomodoroWitNoTask(t *testing.T) {
 }
 func TestGetPomodoroByDate(t *testing.T) {
 	user := createNewUser(t)
+	user.ID = 2
 	pomotype := createNewPomoType(t, user)
 	n := 5
 
@@ -73,12 +74,14 @@ func TestGetPomodoroByDate(t *testing.T) {
 	for i := 0; i < n; i++ {
 		pomodoros = append(pomodoros, createPomoWithNoTask(t, user.ID, pomotype.ID))
 	}
-
+	present := time.Now()
+	date := time.Date(present.Year(), time.Month(11), 0, 0, 0, 0, 0,present.Location())
+	date = date.AddDate(0, 0, 1)
 	params := GetPomodoroByDateParams{
 		UserID:    user.ID,
 		Limit:     int32(n),
 		Offset:    0,
-		QueryDate: time.Now(),
+		QueryDate: date,
 	}
 	pomoRows, err := testQueries.GetPomodoroByDate(context.Background(), params)
 	require.NoError(t, err)
