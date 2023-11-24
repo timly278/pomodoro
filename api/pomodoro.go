@@ -72,6 +72,16 @@ func (server *Server) ListPomoByMonth(ctx *gin.Context) {
 		return
 	}
 
+	rsp, err := server.listPomodoroByMonth(ctx, timeRequest)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+func (server *Server) listPomodoroByMonth(ctx *gin.Context, timeRequest yearMonthRequest) ([][]db.GetPomodoroByDateRow, error) {
 	date := time.Date(int(timeRequest.Year), time.Month(timeRequest.Month), 0, 0, 0, 0, 0, time.Local)
 	numberOfDate := date.Day()
 	rsp := make([][]db.GetPomodoroByDateRow, numberOfDate)
@@ -83,7 +93,7 @@ func (server *Server) ListPomoByMonth(ctx *gin.Context) {
 		date = date.AddDate(0, 0, 1)
 		params := db.GetPomodoroByDateParams{
 			UserID:    userID,
-			Limit:     30, //TODO: what if there are more than 30 pomodoros a day?
+			Limit:     50,
 			Offset:    0,
 			QueryDate: date,
 		}
@@ -93,14 +103,11 @@ func (server *Server) ListPomoByMonth(ctx *gin.Context) {
 				// scan another day of the month
 				continue
 			}
-			ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
-			return
+			return nil, err
 		}
 		rsp[i] = append(rsp[i], pomo...)
 	}
-
-	ctx.JSON(http.StatusOK, rsp)
-
+	return rsp, nil
 }
 
 type listPomoByDateRequest struct {
