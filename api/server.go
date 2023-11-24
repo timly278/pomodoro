@@ -51,8 +51,9 @@ func (server *Server) Setup() {
 	authRoutes.PUT("/api/types/:id", server.UpdateType)
 
 	authRoutes.POST("/api/pomodoros", server.CreateNewPomodoro)
+	//TODO: implement for reporting total days accessed and minutes from begining
 	authRoutes.GET("/api/report", server.SimpleStatisticNumber)
-	authRoutes.GET("/api/report/:month", server.ListPomoByMonth)
+	authRoutes.GET("/api/report/month", server.ListPomoByMonth)
 	authRoutes.GET("/api/report/date", server.ListPomoByDate)
 
 	server.router = router

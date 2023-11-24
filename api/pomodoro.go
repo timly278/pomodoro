@@ -65,14 +65,14 @@ func (server *Server) createPomodoro(ctx *gin.Context, pomoRequest createPomodor
 // response the whole data of the specified month
 func (server *Server) ListPomoByMonth(ctx *gin.Context) {
 
-	monthID, err := getNumericObjectParam(ctx, "month")
-	if err != nil || (monthID > 12 || monthID < 1) {
+	var timeRequest yearMonthRequest
+	err := ctx.ShouldBindQuery(&timeRequest)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
-	present := time.Now()
-	//TODO: update to be able to solve any year
-	date := time.Date(present.Year(), time.Month(monthID), 0, 0, 0, 0, 0, present.Location())
+
+	date := time.Date(int(timeRequest.Year), time.Month(timeRequest.Month), 0, 0, 0, 0, 0, time.Local)
 	numberOfDate := date.Day()
 	rsp := make([][]db.GetPomodoroByDateRow, numberOfDate)
 

@@ -15,6 +15,7 @@ SELECT count(*) FROM
     SELECT EXTRACT(day FROM created_at) as day FROM pomodoros 
     WHERE user_id = $1
     AND EXTRACT(MONTH FROM created_at) = $2::int
+    AND EXTRACT(YEAR FROM created_at) = $3::int
     GROUP BY day
 ) as x LIMIT 1
 `
@@ -22,10 +23,11 @@ SELECT count(*) FROM
 type GetDaysAccessedInMonthParams struct {
 	UserID  int64 `json:"user_id"`
 	MonthID int32 `json:"month_id"`
+	Year    int32 `json:"year"`
 }
 
 func (q *Queries) GetDaysAccessedInMonth(ctx context.Context, arg GetDaysAccessedInMonthParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getDaysAccessedInMonth, arg.UserID, arg.MonthID)
+	row := q.db.QueryRowContext(ctx, getDaysAccessedInMonth, arg.UserID, arg.MonthID, arg.Year)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -40,17 +42,19 @@ SELECT SUM(duration) as minutefocused FROM
 	WHERE t.id = p.type_id 
 	AND p.user_id = $1 
 	AND EXTRACT(MONTH FROM created_at) = $2::int
+    AND EXTRACT(YEAR FROM created_at) = $3::int
 ) as x LIMIT 1
 `
 
 type GetMinutesFocusedInMonthParams struct {
 	UserID  int64 `json:"user_id"`
 	MonthID int32 `json:"month_id"`
+	Year    int32 `json:"year"`
 }
 
 // todo: GetDaysAccessedInYear :one
 func (q *Queries) GetMinutesFocusedInMonth(ctx context.Context, arg GetMinutesFocusedInMonthParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getMinutesFocusedInMonth, arg.UserID, arg.MonthID)
+	row := q.db.QueryRowContext(ctx, getMinutesFocusedInMonth, arg.UserID, arg.MonthID, arg.Year)
 	var minutefocused int64
 	err := row.Scan(&minutefocused)
 	return minutefocused, err
