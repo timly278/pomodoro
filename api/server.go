@@ -56,5 +56,6 @@ func (server *Server) Setup() {
 	authRoutes.GET("/api/report/month", server.ListPomoByMonth)
 	authRoutes.GET("/api/report/date", server.ListPomoByDate)
 
+	//TODO: Task implementation
 	server.router = router
 }
