@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/tls"
 	"fmt"
 	"pomodoro/auth"
 	db "pomodoro/db/sqlc"
@@ -8,6 +9,8 @@ import (
 	"pomodoro/util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	gomail "gopkg.in/mail.v2"
 )
 
 type Server struct {
@@ -15,6 +18,8 @@ type Server struct {
 	tokenMaker auth.TokenMaker
 	config     util.Config
 	router     *gin.Engine
+	dialer     *gomail.Dialer
+	redisdb    *redis.Client
 }
 
 func NewServer(store db.Store, config util.Config) (*Server, error) {
@@ -22,11 +27,27 @@ func NewServer(store db.Store, config util.Config) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
+
+	// Create Redis Client
+	redisDb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisClientAddress,
+		Password: config.RedisDbPassword,
+		DB:       config.RedisDb,
+	})
+
+	// Settings for SMTP server
+	dialer := gomail.NewDialer(config.AppSmtpHost, config.AppSmtpPort, config.AppEmail, config.AppPassword)
+	// This is only needed when SSL/TLS certificate is not valid on server.
+	// In production this should be set to false.
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
 	return &Server{
 		store:      store,
 		tokenMaker: tokenMaker,
 		config:     config,
 		router:     gin.Default(),
+		dialer:     dialer,
+		redisdb:    redisDb,
 	}, nil
 }
 
@@ -37,7 +58,8 @@ func (server *Server) Start(address string) error {
 func (server *Server) Setup() {
 	router := gin.Default()
 
-	router.POST("/register", middleware.EnsureNotLoggedIn(server.tokenMaker), server.CreateUser)
+	router.POST("/register", server.CreateUser)
+	router.POST("/verify", server.VerifyEmail) // and login
 	router.POST("/login", middleware.EnsureNotLoggedIn(server.tokenMaker), server.UserLogin)
 
 	authRoutes := router.Group("/")

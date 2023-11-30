@@ -1,7 +1,7 @@
 package api
 
 import (
-	"database/sql"
+	"errors"
 	"net/http"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
@@ -45,33 +45,72 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 		return
 	}
 
+	user, statusCode, err := server.isEmailExisted(ctx, newUser.Email)
+	if statusCode == http.StatusInternalServerError {
+		ctx.JSON(statusCode, response.ErrorResponse(err))
+		return
+	} else if statusCode == http.StatusFound {
+		if user.EmailVerified { //email is verified
+			err = errors.New("error: account has existed")
+			ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+			return
+		}
+	}
+
 	hashedPassword, err := util.HashPassword(newUser.Password)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
 	}
 
-	createUserParams := db.CreateUserParams{
-		Username:       newUser.Username,
-		HashedPassword: hashedPassword,
-		Email:          newUser.Email,
-	}
-	createdUser, err := server.store.CreateUser(ctx, createUserParams)
-	if err != nil {
-		//todo: handle detail error of pq here
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
-		return
+	var message string
+	if user != (db.User{}) {
+		user, statusCode, err = server.updateUserPassword(ctx, user.ID, hashedPassword)
+		if err != nil {
+			ctx.JSON(statusCode, response.ErrorResponse(err))
+			return
+		}
+		message = "user existed and password has been updated successfully"
+	} else {
+		createUserParams := db.CreateUserParams{
+			Username:       newUser.Username,
+			HashedPassword: hashedPassword,
+			Email:          newUser.Email,
+		}
+		user, err = server.store.CreateUser(ctx, createUserParams)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+			return
+		}
+		message = "create new user successfully"
 	}
 
-	rsp := newUserResponse(createdUser)
+	go server.sendEmailVerification(ctx, newUser)
+
+	rsp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, response.Response{
-		Message: "register successfully",
+		Message: message,
 		Data:    rsp,
 	})
 }
 
+func (server *Server) updateUserPassword(ctx *gin.Context, userID int64, hashedPass string) (user db.User, statusCode int, err error) {
+
+	user, err = server.store.UpdatePassword(ctx, db.UpdatePasswordParams{
+		ID:                userID,
+		HashedPassword:    hashedPass,
+		PasswordChangedAt: time.Now(),
+	})
+	if err != nil {
+		statusCode = http.StatusInternalServerError
+		return
+	}
+
+	return user, http.StatusOK, nil
+}
+
 type userLoginRequest struct {
-	Username string `json:"username" binding:"required,alphanum"`
+	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6,max=12"`
 }
 
@@ -90,15 +129,14 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 		return
 	}
 
-	user, err := server.store.GetUser(ctx, userLogin.Username)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, response.ErrorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+	user, statusCode, err := server.isEmailExisted(ctx, userLogin.Email)
+	if statusCode != http.StatusFound {
+		ctx.JSON(statusCode, response.ErrorResponse(err))
 		return
 	}
+
+	//check Email of user is verified or not???
+	// if not, redirect user to verify email
 
 	err = util.VerifyPassword(userLogin.Password, user.HashedPassword)
 	if err != nil {

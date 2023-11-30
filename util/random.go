@@ -7,6 +7,7 @@ import (
 
 const (
 	alphabet = "asdfghjklzxcvbnmqwertyuiop"
+	numeric  = "0123456789"
 )
 
 // RandomInt generate a random integer within [min,max]
@@ -29,10 +30,23 @@ func RandomString(n int) string {
 
 func RandomColor() string {
 	var list = []string{"Red", "Yellow", "Orange", "Green"}
-	return list[RandomInt(0, int64(len(list) - 1))]
+	return list[RandomInt(0, int64(len(list)-1))]
 }
 
 func RandomAlarmSound() string {
 	var list = []string{"Kitchen", "Bell", "Bird", "Digital"}
-	return list[RandomInt(0, int64(len(list) - 1))]
+	return list[RandomInt(0, int64(len(list)-1))]
+}
+
+func RandomVerificationCode() string {
+	codeLength := 6
+	k := len(numeric)
+	var str strings.Builder
+
+	for i := 0; i < codeLength; i++ {
+		c := numeric[rand.Intn(k)]
+		str.WriteByte(c)
+	}
+
+	return str.String()
 }

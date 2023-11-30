@@ -51,4 +51,7 @@ type User struct {
 	CreatedAt         time.Time `json:"created_at"`
 	AlarmSound        string    `json:"alarm_sound"`
 	RepeatAlarm       int32     `json:"repeat_alarm"`
+	EmailVerified     bool      `json:"email_verified"`
+	RefreshToken      string    `json:"refresh_token"`
+	SessionState      string    `json:"session_state"`
 }

@@ -31,3 +31,12 @@ sqlc:
 server:
 	go run ./cmd/main.go
 .PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc server
+
+network:
+	docker network create -d bridge mynetwork
+
+redis:
+	docker run -d --name rdbtulb2 -p 6379:6379  --network mynetwork redis
+
+exec_redis:
+	docker exec -it rdbtulb2 redis-cli

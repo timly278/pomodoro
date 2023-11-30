@@ -22,14 +22,17 @@ type Querier interface {
 	GetTaskById(ctx context.Context, id int64) (Type, error)
 	GetTotalDaysAccessed(ctx context.Context, userID int64) (int64, error)
 	GetTypeById(ctx context.Context, id int64) (Type, error)
-	GetUser(ctx context.Context, username string) (User, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	ListTasks(ctx context.Context, userID int64) ([]Task, error)
 	ListTypes(ctx context.Context, userID int64) ([]Type, error)
+	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error)
+	UpdateRefreshToken(ctx context.Context, arg UpdateRefreshTokenParams) (User, error)
 	UpdateTaskConfig(ctx context.Context, arg UpdateTaskConfigParams) (Task, error)
 	UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) (Task, error)
 	UpdateTypeById(ctx context.Context, arg UpdateTypeByIdParams) (Type, error)
 	UpdateUserSetting(ctx context.Context, arg UpdateUserSettingParams) (User, error)
+	UpdateVerifyEmail(ctx context.Context, arg UpdateVerifyEmailParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

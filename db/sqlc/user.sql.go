@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -16,7 +17,7 @@ INSERT INTO users (
   email
 ) VALUES (
   $1, $2, $3
-) RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm
+) RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
 `
 
 type CreateUserParams struct {
@@ -37,17 +38,20 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.CreatedAt,
 		&i.AlarmSound,
 		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
 	)
 	return i, err
 }
 
-const getUser = `-- name: GetUser :one
-SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm FROM users
-WHERE username = $1 LIMIT 1
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state FROM users
+WHERE email = $1 LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, username)
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -58,12 +62,15 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 		&i.CreatedAt,
 		&i.AlarmSound,
 		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm FROM users
+SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -79,6 +86,73 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 		&i.CreatedAt,
 		&i.AlarmSound,
 		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
+	)
+	return i, err
+}
+
+const updatePassword = `-- name: UpdatePassword :one
+UPDATE users
+SET hashed_password = $2,
+    password_changed_at = $3
+WHERE id = $1
+RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
+`
+
+type UpdatePasswordParams struct {
+	ID                int64     `json:"id"`
+	HashedPassword    string    `json:"hashed_password"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+}
+
+func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updatePassword, arg.ID, arg.HashedPassword, arg.PasswordChangedAt)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.HashedPassword,
+		&i.Email,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
+	)
+	return i, err
+}
+
+const updateRefreshToken = `-- name: UpdateRefreshToken :one
+UPDATE users
+SET refresh_token = $2
+WHERE id = $1
+RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
+`
+
+type UpdateRefreshTokenParams struct {
+	ID           int64  `json:"id"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+func (q *Queries) UpdateRefreshToken(ctx context.Context, arg UpdateRefreshTokenParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateRefreshToken, arg.ID, arg.RefreshToken)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.HashedPassword,
+		&i.Email,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
 	)
 	return i, err
 }
@@ -89,7 +163,7 @@ SET   username = $2,
       alarm_sound = $3,
       repeat_alarm = $4
 WHERE id = $1
-RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm
+RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
 `
 
 type UpdateUserSettingParams struct {
@@ -116,6 +190,40 @@ func (q *Queries) UpdateUserSetting(ctx context.Context, arg UpdateUserSettingPa
 		&i.CreatedAt,
 		&i.AlarmSound,
 		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
+	)
+	return i, err
+}
+
+const updateVerifyEmail = `-- name: UpdateVerifyEmail :one
+UPDATE users
+SET email_verified = $2
+WHERE id = $1
+RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
+`
+
+type UpdateVerifyEmailParams struct {
+	ID            int64 `json:"id"`
+	EmailVerified bool  `json:"email_verified"`
+}
+
+func (q *Queries) UpdateVerifyEmail(ctx context.Context, arg UpdateVerifyEmailParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateVerifyEmail, arg.ID, arg.EmailVerified)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.HashedPassword,
+		&i.Email,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+		&i.AlarmSound,
+		&i.RepeatAlarm,
+		&i.EmailVerified,
+		&i.RefreshToken,
+		&i.SessionState,
 	)
 	return i, err
 }
