@@ -76,6 +76,7 @@ func (server *Server) UpdateType(ctx *gin.Context) {
 
 	pomotype, err := server.store.UpdateTypeById(ctx, db.UpdateTypeByIdParams{
 		ID:                typeId,
+		UserID:            getUserId(ctx),
 		Name:              typeRequest.Name,
 		Color:             typeRequest.Color,
 		Goalperday:        typeRequest.Goalperday,

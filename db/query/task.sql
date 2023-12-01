@@ -16,18 +16,18 @@ ORDER BY id;
 
 -- name: UpdateTaskConfig :one
 UPDATE tasks
-SET     content = $2,
-        estimate_pomos = $3
-WHERE id = $1
+SET     content = $3,
+        estimate_pomos = $4
+WHERE id = $1 AND user_id = $2
 RETURNING *;
 
 -- name: UpdateTaskStatus :one
 UPDATE tasks
-SET     status = $2,
-        progress_pomos = $3
-WHERE id = $1
+SET     status = $3,
+        progress_pomos = $4
+WHERE id = $1 AND user_id = $2
 RETURNING *;
 
 -- name: GetTaskById :one
 SELECT * FROM types
-WHERE id = $1 LIMIT 1;
+WHERE id = $1 AND user_id = $2 LIMIT 1;

@@ -53,11 +53,16 @@ func (q *Queries) CreateNewTask(ctx context.Context, arg CreateNewTaskParams) (T
 
 const getTaskById = `-- name: GetTaskById :one
 SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday FROM types
-WHERE id = $1 LIMIT 1
+WHERE id = $1 AND user_id = $2 LIMIT 1
 `
 
-func (q *Queries) GetTaskById(ctx context.Context, id int64) (Type, error) {
-	row := q.db.QueryRowContext(ctx, getTaskById, id)
+type GetTaskByIdParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+}
+
+func (q *Queries) GetTaskById(ctx context.Context, arg GetTaskByIdParams) (Type, error) {
+	row := q.db.QueryRowContext(ctx, getTaskById, arg.ID, arg.UserID)
 	var i Type
 	err := row.Scan(
 		&i.ID,
@@ -114,20 +119,26 @@ func (q *Queries) ListTasks(ctx context.Context, userID int64) ([]Task, error) {
 
 const updateTaskConfig = `-- name: UpdateTaskConfig :one
 UPDATE tasks
-SET     content = $2,
-        estimate_pomos = $3
-WHERE id = $1
+SET     content = $3,
+        estimate_pomos = $4
+WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, content, status, estimate_pomos, progress_pomos, created_at, completed_at
 `
 
 type UpdateTaskConfigParams struct {
 	ID            int64  `json:"id"`
+	UserID        int64  `json:"user_id"`
 	Content       string `json:"content"`
 	EstimatePomos int32  `json:"estimate_pomos"`
 }
 
 func (q *Queries) UpdateTaskConfig(ctx context.Context, arg UpdateTaskConfigParams) (Task, error) {
-	row := q.db.QueryRowContext(ctx, updateTaskConfig, arg.ID, arg.Content, arg.EstimatePomos)
+	row := q.db.QueryRowContext(ctx, updateTaskConfig,
+		arg.ID,
+		arg.UserID,
+		arg.Content,
+		arg.EstimatePomos,
+	)
 	var i Task
 	err := row.Scan(
 		&i.ID,
@@ -144,20 +155,26 @@ func (q *Queries) UpdateTaskConfig(ctx context.Context, arg UpdateTaskConfigPara
 
 const updateTaskStatus = `-- name: UpdateTaskStatus :one
 UPDATE tasks
-SET     status = $2,
-        progress_pomos = $3
-WHERE id = $1
+SET     status = $3,
+        progress_pomos = $4
+WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, content, status, estimate_pomos, progress_pomos, created_at, completed_at
 `
 
 type UpdateTaskStatusParams struct {
 	ID            int64 `json:"id"`
+	UserID        int64 `json:"user_id"`
 	Status        int32 `json:"status"`
 	ProgressPomos int32 `json:"progress_pomos"`
 }
 
 func (q *Queries) UpdateTaskStatus(ctx context.Context, arg UpdateTaskStatusParams) (Task, error) {
-	row := q.db.QueryRowContext(ctx, updateTaskStatus, arg.ID, arg.Status, arg.ProgressPomos)
+	row := q.db.QueryRowContext(ctx, updateTaskStatus,
+		arg.ID,
+		arg.UserID,
+		arg.Status,
+		arg.ProgressPomos,
+	)
 	var i Task
 	err := row.Scan(
 		&i.ID,

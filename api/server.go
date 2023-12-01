@@ -59,7 +59,7 @@ func (server *Server) Setup() {
 	router := gin.Default()
 
 	router.POST("/register", server.CreateUser)
-	router.POST("/verification", server.VerifyEmail) // and login
+	router.POST("/verification", server.EmailVerification) // and login
 	router.POST("/login", middleware.EnsureNotLoggedIn(server.tokenMaker), server.UserLogin)
 
 	authRoutes := router.Group("/")

@@ -20,17 +20,17 @@ ORDER BY id;
 
 -- name: UpdateTypeById :one
 UPDATE types
-SET name = $2,
-    color = $3,
-    goalperday = $4,
-    shortbreak = $5,
-    duration = $6,
-    longbreak = $7,
-    longbreakinterval = $8,
-    autostart_break = $9
-WHERE id = $1
+SET name = $3,
+    color = $4,
+    goalperday = $5,
+    shortbreak = $6,
+    duration = $7,
+    longbreak = $8,
+    longbreakinterval = $9,
+    autostart_break = $10
+WHERE id = $1 AND user_id = $2
 RETURNING *;
 
 -- name: GetTypeById :one
 SELECT * FROM types
-WHERE id = $1 LIMIT 1;
+WHERE id = $1 AND user_id = $2 LIMIT 1;

@@ -32,7 +32,7 @@ type verificationResponse struct {
 	Email  string `json:"email"`
 }
 
-func (server *Server) VerifyEmail(ctx *gin.Context) {
+func (server *Server) EmailVerification(ctx *gin.Context) {
 	var verifyRequest verificationRequest
 	err := ctx.ShouldBindJSON(&verifyRequest)
 	if err != nil {

@@ -67,11 +67,16 @@ func (q *Queries) CreateNewType(ctx context.Context, arg CreateNewTypeParams) (T
 
 const getTypeById = `-- name: GetTypeById :one
 SELECT id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday FROM types
-WHERE id = $1 LIMIT 1
+WHERE id = $1 AND user_id = $2 LIMIT 1
 `
 
-func (q *Queries) GetTypeById(ctx context.Context, id int64) (Type, error) {
-	row := q.db.QueryRowContext(ctx, getTypeById, id)
+type GetTypeByIdParams struct {
+	ID     int64 `json:"id"`
+	UserID int64 `json:"user_id"`
+}
+
+func (q *Queries) GetTypeById(ctx context.Context, arg GetTypeByIdParams) (Type, error) {
+	row := q.db.QueryRowContext(ctx, getTypeById, arg.ID, arg.UserID)
 	var i Type
 	err := row.Scan(
 		&i.ID,
@@ -130,20 +135,21 @@ func (q *Queries) ListTypes(ctx context.Context, userID int64) ([]Type, error) {
 
 const updateTypeById = `-- name: UpdateTypeById :one
 UPDATE types
-SET name = $2,
-    color = $3,
-    goalperday = $4,
-    shortbreak = $5,
-    duration = $6,
-    longbreak = $7,
-    longbreakinterval = $8,
-    autostart_break = $9
-WHERE id = $1
+SET name = $3,
+    color = $4,
+    goalperday = $5,
+    shortbreak = $6,
+    duration = $7,
+    longbreak = $8,
+    longbreakinterval = $9,
+    autostart_break = $10
+WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, name, color, duration, shortbreak, longbreak, longbreakinterval, autostart_break, goalperday
 `
 
 type UpdateTypeByIdParams struct {
 	ID                int64  `json:"id"`
+	UserID            int64  `json:"user_id"`
 	Name              string `json:"name"`
 	Color             string `json:"color"`
 	Goalperday        int32  `json:"goalperday"`
@@ -157,6 +163,7 @@ type UpdateTypeByIdParams struct {
 func (q *Queries) UpdateTypeById(ctx context.Context, arg UpdateTypeByIdParams) (Type, error) {
 	row := q.db.QueryRowContext(ctx, updateTypeById,
 		arg.ID,
+		arg.UserID,
 		arg.Name,
 		arg.Color,
 		arg.Goalperday,
