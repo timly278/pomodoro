@@ -32,7 +32,7 @@ RETURNING *;
 -- name: UpdateVerifyEmail :one
 UPDATE users
 SET email_verified = $2
-WHERE id = $1
+WHERE email = $1
 RETURNING *;
 
 -- name: UpdatePassword :one

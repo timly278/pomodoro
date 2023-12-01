@@ -85,7 +85,7 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 		message = "create new user successfully"
 	}
 
-	go server.sendEmailVerification(ctx, newUser)
+	go server.sendEmailVerification(ctx, newUser.Email, newUser.Password)
 
 	rsp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, response.Response{
@@ -135,12 +135,17 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 		return
 	}
 
-	//check Email of user is verified or not???
-	// if not, redirect user to verify email
-
 	err = util.VerifyPassword(userLogin.Password, user.HashedPassword)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
+		return
+	}
+
+	if !user.EmailVerified {
+		go server.sendEmailVerification(ctx, user.Email, userLogin.Password)
+		// redirect user to verification email page
+		err = errors.New("waiting for user's email verification")
+		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(err))
 		return
 	}
 
