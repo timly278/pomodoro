@@ -64,19 +64,24 @@ func (server *Server) Setup() {
 
 	authRoutes := router.Group("/")
 	authRoutes.Use(middleware.EnsureLoggedIn(server.tokenMaker))
+
 	authRoutes.POST("/logout", server.UserLogout)
 	authRoutes.POST("/dosomething/:num", server.Dosomething)
 
-	authRoutes.PUT("/api/users", server.UpdateUserSetting)
-	authRoutes.POST("/api/types", server.CreateNewPomoType)
-	authRoutes.GET("/api/types", server.ListPomoType)
-	authRoutes.PUT("/api/types/:id", server.UpdateType)
+	api := authRoutes.Group("/api")
+	api.PUT("/users", server.UpdateUserSetting)
+	api.POST("/pomodoros", server.CreateNewPomodoro)
 
-	authRoutes.POST("/api/pomodoros", server.CreateNewPomodoro)
+	types := api.Group("/types")
+	types.POST("/", server.CreateNewPomoType)
+	types.GET("/", server.ListPomoType)
+	types.PUT("/:id", server.UpdateType)
+
+	report := api.Group("/report")
+	report.GET("/", server.SimpleStatisticNumber)
+	report.GET("/month", server.ListPomoByMonth)
+	report.GET("/date", server.ListPomoByDate)
 	//TODO: implement for reporting total days accessed and minutes from begining
-	authRoutes.GET("/api/report", server.SimpleStatisticNumber)
-	authRoutes.GET("/api/report/month", server.ListPomoByMonth)
-	authRoutes.GET("/api/report/date", server.ListPomoByDate)
 
 	//TODO: Task implementation
 	server.router = router
