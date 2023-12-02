@@ -23,8 +23,8 @@ func NewJwtTokenMaker(secretKey string) (*JwtTokenMaker, error) {
 }
 
 // method to create token
-func (maker *JwtTokenMaker) CreateToken(id string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(id, duration)
+func (maker *JwtTokenMaker) CreateToken(id, subject string, duration time.Duration) (string, error) {
+	payload, err := NewPayload(id, subject, duration)
 	if err != nil {
 		return "", errors.New("cannot create token")
 	}
@@ -34,7 +34,7 @@ func (maker *JwtTokenMaker) CreateToken(id string, duration time.Duration) (stri
 }
 
 // method to verify token
-func (maker *JwtTokenMaker) VerifyToken(tokenString string) (*Payload, error) {
+func (maker *JwtTokenMaker) VerifyToken(tokenString, subject string) (*Payload, error) {
 	keyfunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
@@ -50,6 +50,9 @@ func (maker *JwtTokenMaker) VerifyToken(tokenString string) (*Payload, error) {
 	}
 	payload2, ok := token.Claims.(*Payload)
 	if !ok {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+	if subject != payload2.Subject {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
 	return payload2, nil

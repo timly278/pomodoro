@@ -62,6 +62,8 @@ func (server *Server) Setup() {
 	router.POST("/verification", server.EmailVerification) // and login
 	router.POST("/login", middleware.EnsureNotLoggedIn(server.tokenMaker), server.UserLogin)
 
+	router.POST("/refresh-token", server.RefreshToken)
+
 	authRoutes := router.Group("/")
 	authRoutes.Use(middleware.EnsureLoggedIn(server.tokenMaker))
 

@@ -7,12 +7,17 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	SUBJECT_CLAIM_ACCESS_TOKEN  = "access token claim"
+	SUBJECT_CLAIM_REFRESH_TOKEN = "refresh token claim"
+)
+
 type Payload struct {
 	ID uuid.UUID `json:"id"`
 	jwt.RegisteredClaims
 }
 
-func NewPayload(userid string, duration time.Duration) (*Payload, error) {
+func NewPayload(userid string, subject string, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -22,7 +27,8 @@ func NewPayload(userid string, duration time.Duration) (*Payload, error) {
 	payload := Payload{
 		tokenID,
 		jwt.RegisteredClaims{
-			ID:    userid,
+			ID:        userid,
+			Subject:   subject,
 			IssuedAt:  jwt.NewNumericDate(issueAt),
 			ExpiresAt: jwt.NewNumericDate(expiredAt),
 		},

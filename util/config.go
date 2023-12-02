@@ -7,18 +7,19 @@ import (
 )
 
 type Config struct {
-	DBDriver            string        `mapstructure:"DB_DRIVER"`
-	DBSource            string        `mapstructure:"DB_SOURCE"`
-	ServerAddress       string        `mapstructure:"SERVER_ADDRESS"`
-	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	AppEmail            string        `mapstructure:"APP_EMAIL"`
-	AppPassword         string        `mapstructure:"APP_PASSWORD"`
-	AppSmtpHost         string        `mapstructure:"APP_SMTP_HOST"`
-	AppSmtpPort         int           `mapstructure:"APP_SMTP_PORT"`
-	RedisClientAddress  string        `mapstructure:"REDIS_CLIENT_ADDRESS"`
-	RedisDbPassword     string        `mapstructure:"REDIS_DB_PASSWORD"`
-	RedisDb             int           `mapstructure:"REDIS_DB"`
+	DBDriver             string        `mapstructure:"DB_DRIVER"`
+	DBSource             string        `mapstructure:"DB_SOURCE"`
+	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
+	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	AppEmail             string        `mapstructure:"APP_EMAIL"`
+	AppPassword          string        `mapstructure:"APP_PASSWORD"`
+	AppSmtpHost          string        `mapstructure:"APP_SMTP_HOST"`
+	AppSmtpPort          int           `mapstructure:"APP_SMTP_PORT"`
+	RedisClientAddress   string        `mapstructure:"REDIS_CLIENT_ADDRESS"`
+	RedisDbPassword      string        `mapstructure:"REDIS_DB_PASSWORD"`
+	RedisDb              int           `mapstructure:"REDIS_DB"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

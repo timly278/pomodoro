@@ -6,7 +6,6 @@ import (
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"pomodoro/util"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,24 +15,6 @@ type createUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6,max=12"`
 	Email    string `json:"email" binding:"required,email"`
-}
-
-type userResponse struct {
-	ID                int64     `json:"id"`
-	Username          string    `json:"username" `
-	Email             string    `json:"email"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
-	CreatedAt         time.Time `json:"created_at"`
-}
-
-func newUserResponse(user db.User) userResponse {
-	return userResponse{
-		ID:                user.ID,
-		Username:          user.Username,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
 }
 
 // CreateUser - user signing up
@@ -87,7 +68,7 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 
 	go server.sendEmailVerification(ctx, newUser.Email, newUser.Password)
 
-	rsp := newUserResponse(user)
+	rsp := response.NewUserResponse(user)
 	ctx.JSON(http.StatusOK, response.Response{
 		Message: message,
 		Data:    rsp,
@@ -112,11 +93,6 @@ func (server *Server) updateUserPassword(ctx *gin.Context, userID int64, hashedP
 type userLoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6,max=12"`
-}
-
-type userLoginResponse struct {
-	AccessToken string       `json:"access_token"`
-	User        userResponse `json:"user"`
 }
 
 // UserLogin
@@ -149,21 +125,14 @@ func (server *Server) UserLogin(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(strconv.FormatInt(user.ID, 10), server.config.AccessTokenDuration)
+	newTokens, err := server.issueNewTokens(ctx, user.ID)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		return
 	}
 
-	res := userLoginResponse{
-		AccessToken: accessToken,
-		User:        newUserResponse(user),
-	}
-
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "login successfully",
-		Data:    res,
-	})
+	rsp := response.LoginSuccessfully(&user, &newTokens)
+	ctx.JSON(http.StatusOK, *rsp)
 
 }
 
@@ -202,7 +171,7 @@ func (server *Server) UpdateUserSetting(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
 	}
-	rsp := newUserResponse(user)
+	rsp := response.NewUserResponse(user)
 	ctx.JSON(http.StatusOK, response.Response{
 		Message: "update setting successfully",
 		Data:    rsp,

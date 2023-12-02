@@ -9,7 +9,6 @@ import (
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"pomodoro/util"
-	"strconv"
 	"time"
 
 	gomail "gopkg.in/mail.v2"
@@ -24,12 +23,6 @@ const (
 type verificationRequest struct {
 	Email string `json:"email" binding:"required,email"`
 	Code  string `json:"code" binding:"required"`
-}
-
-type verificationResponse struct {
-	Token  string `json:"token"`
-	UserID int64  `json:"user_id"`
-	Email  string `json:"email"`
 }
 
 func (server *Server) EmailVerification(ctx *gin.Context) {
@@ -52,22 +45,14 @@ func (server *Server) EmailVerification(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(strconv.FormatInt(user.ID, 10), server.config.AccessTokenDuration)
+	newTokens, err := server.issueNewTokens(ctx, user.ID)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		return
 	}
-	res := verificationResponse{
-		Token:  accessToken,
-		UserID: user.ID,
-		Email:  verifyRequest.Email,
-	}
 
-	// TODO: redirect to logged-in page
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "login successfully",
-		Data:    res,
-	})
+	rsp := response.LoginSuccessfully(&user, &newTokens)
+	ctx.JSON(http.StatusOK, *rsp)
 }
 
 func (server *Server) emailVerificationDBUpdate(ctx *gin.Context, email string) (user db.User, statusCode int, err error) {

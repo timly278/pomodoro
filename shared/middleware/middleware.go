@@ -76,7 +76,7 @@ func isLoggedIn(tokenMaker auth.TokenMaker, ctx *gin.Context) (*auth.Payload, er
 	}
 
 	accessToken := fields[1]
-	payload, err := tokenMaker.VerifyToken(accessToken)
+	payload, err := tokenMaker.VerifyToken(accessToken, auth.SUBJECT_CLAIM_ACCESS_TOKEN)
 	if err != nil {
 		return nil, err
 	}
