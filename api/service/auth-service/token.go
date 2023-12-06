@@ -1,4 +1,4 @@
-package logging
+package authservice
 
 import (
 	"context"
@@ -14,21 +14,9 @@ const (
 	REFRESH_TOKEN_FAKE = ""
 )
 
-type TokenLogging struct {
-	store      db.Store
-	tokenMaker security.TokenMaker
-	conf       *util.Config
-}
 
-func NewTokenLogging(store db.Store, tokenMaker security.TokenMaker, conf *util.Config) *TokenLogging {
-	return &TokenLogging{
-		store:      store,
-		tokenMaker: tokenMaker,
-		conf:       conf,
-	}
-}
 
-func (t *TokenLogging) RefreshTokens(ctx context.Context, req delivery.RefreshTokenRequest) (*response.NewTokensResponse, error) {
+func (t *authService) RefreshTokens(ctx context.Context, req delivery.RefreshTokenRequest) (*response.NewTokensResponse, error) {
 	userId, err := t.validateRefreshToken(ctx, req.RefreshToken)
 	if err != nil {
 		return nil, err
@@ -41,13 +29,13 @@ func (t *TokenLogging) RefreshTokens(ctx context.Context, req delivery.RefreshTo
 	return newTokens, nil
 }
 
-func (t *TokenLogging) newTokens(ctx context.Context, userId int64) (rsp *response.NewTokensResponse, err error) {
-	accessToken, err := newAccessToken(t.tokenMaker, t.conf, userId)
+func (t *authService) newTokens(ctx context.Context, userId int64) (rsp *response.NewTokensResponse, err error) {
+	accessToken, err := newAccessToken(t.tokenMaker, t.config, userId)
 	if err != nil {
 		return
 	}
 
-	refreshToken, err := newRefreshToken(t.tokenMaker, t.conf, userId)
+	refreshToken, err := newRefreshToken(t.tokenMaker, t.config, userId)
 	if err != nil {
 		return
 	}
@@ -63,14 +51,14 @@ func (t *TokenLogging) newTokens(ctx context.Context, userId int64) (rsp *respon
 
 	rsp = &response.NewTokensResponse{
 		RefreshToken: refreshToken,
-		RTExpireIn:   int64(t.conf.RefreshTokenDuration.Seconds()),
+		RTExpireIn:   int64(t.config.RefreshTokenDuration.Seconds()),
 		AccessToken:  accessToken,
-		ATExpireIn:   int64(t.conf.AccessTokenDuration.Seconds()),
+		ATExpireIn:   int64(t.config.AccessTokenDuration.Seconds()),
 	}
 	return
 }
 
-func (t *TokenLogging) validateRefreshToken(ctx context.Context, rToken string) (userid int64, err error) {
+func (t *authService) validateRefreshToken(ctx context.Context, rToken string) (userid int64, err error) {
 
 	// verify RefreshToken
 	payload, err := t.tokenMaker.VerifyToken(rToken, security.SUBJECT_CLAIM_REFRESH_TOKEN)
@@ -96,7 +84,7 @@ func (t *TokenLogging) validateRefreshToken(ctx context.Context, rToken string) 
 	return int64(userId), nil
 }
 
-func (t *TokenLogging) revokeRefreshToken(ctx context.Context, userId int64) (err error) {
+func (t *authService) revokeRefreshToken(ctx context.Context, userId int64) (err error) {
 	_, err = t.store.UpdateRefreshToken(ctx, db.UpdateRefreshTokenParams{
 		ID:           userId,
 		RefreshToken: REFRESH_TOKEN_FAKE,

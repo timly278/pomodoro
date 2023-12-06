@@ -3,10 +3,14 @@ package server
 import (
 	"crypto/tls"
 	"fmt"
+	"pomodoro/api/delivery"
+	"pomodoro/api/delivery/auth-handlers"
+	pomodo "pomodoro/api/delivery/pomo-handlers"
 	db "pomodoro/db/sqlc"
 	"pomodoro/security"
 	"pomodoro/util"
 
+	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	gomail "gopkg.in/mail.v2"
 )
@@ -17,7 +21,6 @@ type Server struct {
 	config     *util.Config
 	dialer     *gomail.Dialer
 	redisdb    *redis.Client
-
 	// logger
 }
 
@@ -51,5 +54,9 @@ func NewServer(store db.Store, config *util.Config) (*Server, error) {
 }
 
 func (s *Server) Run(address string) {
-
+	router := gin.Default()
+	authHandlers := auth.NewAuthHandlers(s.store, s.tokenMaker, s.redisdb, s.dialer, s.config)
+	pomoHandlers := pomodo.NewPomoHandlers(s.store)
+	delivery.MapAuthRoutes(router.Group("api/v1/auth"), authHandlers)
+	delivery.MapPomoRoutes(router.Group("api/v1/app"), pomoHandlers)
 }

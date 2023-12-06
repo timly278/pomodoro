@@ -3,8 +3,8 @@ package main
 import (
 	"database/sql"
 	"log"
-	"pomodoro/api"
 	db "pomodoro/db/sqlc"
+	"pomodoro/server"
 	"pomodoro/util"
 
 	_ "github.com/lib/pq"
@@ -23,14 +23,11 @@ func main() {
 	}
 
 	store := db.NewSQLStore(dataBase)
-	server, err := api.NewServer(store, config)
+	server, err := server.NewServer(store, &config)
 	if err != nil {
 		log.Println("cannot create server", err)
 	}
 
-	server.Setup()
-	err = server.Start(config.ServerAddress)
-	if err != nil {
-		log.Println("can not start server.", err)
-	}
+	server.Run(config.ServerAddress)
+
 }

@@ -1,33 +1,14 @@
-package handlers
+package auth
 
 import (
 	"net/http"
 	"pomodoro/api/delivery"
-	"pomodoro/api/service"
-	logging "pomodoro/api/service/service-imp"
-	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	gomail "gopkg.in/mail.v2"
 )
 
-type emailHandlers struct {
-	mailService service.EmailVerifier
-	userService service.User
-}
-
-var _ delivery.EmailHandlers = (*emailHandlers)(nil)
-
-func NewEmailHandlers(store db.Store, redisdb *redis.Client, dialer *gomail.Dialer, from string) *emailHandlers {
-	mailService := logging.NewEmailVerifier(store, redisdb, dialer, from)
-	userService := logging.NewUserLogging(store, redisdb)
-
-	return &emailHandlers{mailService: mailService, userService: userService}
-}
-
-func (eh *emailHandlers) SendCode(ctx *gin.Context) {
+func (eh *authHandlers) SendCode(ctx *gin.Context) {
 
 	// TODO: do I need to write some middleware to protect this kind of API?
 
@@ -38,7 +19,7 @@ func (eh *emailHandlers) SendCode(ctx *gin.Context) {
 		return
 	}
 
-	err = eh.mailService.Send(ctx, req.Email)
+	err = eh.authService.Send(ctx, req.Email)
 	if err != nil {
 		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(err))
 		return
@@ -51,7 +32,7 @@ func (eh *emailHandlers) SendCode(ctx *gin.Context) {
 
 }
 
-func (eh *emailHandlers) Verify(ctx *gin.Context) {
+func (eh *authHandlers) Verify(ctx *gin.Context) {
 	var req delivery.VerificationRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -59,7 +40,7 @@ func (eh *emailHandlers) Verify(ctx *gin.Context) {
 		return
 	}
 
-	ok, err := eh.mailService.Verify(ctx, req.Email, req.Code)
+	ok, err := eh.authService.Verify(ctx, req.Email, req.Code)
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return

@@ -1,9 +1,10 @@
-package handlers
+package pomodo
 
 import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"time"
@@ -11,14 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type createPomodoroRequest struct {
-	TypeID      int64 `json:"type_id" binding:"required,min=1"`
-	TaskID      int64 `json:"task_id"`
-	FocusDegree int32 `json:"focus_degree" binding:"required,min=1,max=5"`
-}
-
-func (server *Server) CreateNewPomodoro(ctx *gin.Context) {
-	var pomoRequest createPomodoroRequest
+func (pomo *pomoHandlers) CreateNewPomodoro(ctx *gin.Context) {
+	var pomoRequest delivery.CreatePomodoroRequest
 
 	err := ctx.ShouldBindJSON(&pomoRequest)
 	if err != nil {
@@ -26,7 +21,7 @@ func (server *Server) CreateNewPomodoro(ctx *gin.Context) {
 		return
 	}
 
-	pomodoro, err := server.createPomodoro(ctx, pomoRequest)
+	pomodoro, err := pomo.createPomodoro(ctx, pomoRequest)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, response.ErrorResponse(err))
@@ -38,18 +33,18 @@ func (server *Server) CreateNewPomodoro(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, pomodoro)
 }
 
-func (server *Server) createPomodoro(ctx *gin.Context, pomoRequest createPomodoroRequest) (pomodoro db.Pomodoro, err error) {
+func (pomo *pomoHandlers) createPomodoro(ctx *gin.Context, pomoRequest delivery.CreatePomodoroRequest) (pomodoro db.Pomodoro, err error) {
 	var taskID sql.NullInt64
-	userId := getUserId(ctx)
+	userId := delivery.GetUserId(ctx)
 	if pomoRequest.TaskID == 0 {
-		pomodoro, err = server.store.CreatePomodoroWithNoTask(ctx, db.CreatePomodoroWithNoTaskParams{
+		pomodoro, err = pomo.store.CreatePomodoroWithNoTask(ctx, db.CreatePomodoroWithNoTaskParams{
 			UserID:      userId,
 			TypeID:      pomoRequest.TypeID,
 			FocusDegree: pomoRequest.FocusDegree,
 		})
 	} else {
 		taskID.Scan(pomoRequest.TaskID)
-		pomodoro, err = server.store.CreatePomodoroWithTask(ctx, db.CreatePomodoroWithTaskParams{
+		pomodoro, err = pomo.store.CreatePomodoroWithTask(ctx, db.CreatePomodoroWithTaskParams{
 			UserID:      userId,
 			TypeID:      pomoRequest.TypeID,
 			TaskID:      taskID,
@@ -63,7 +58,7 @@ func (server *Server) createPomodoro(ctx *gin.Context, pomoRequest createPomodor
 
 // GET("/api/report/month/:id")
 // response the whole data of the specified month
-func (server *Server) ListPomoByMonth(ctx *gin.Context) {
+func (pomo *pomoHandlers) ListPomoByMonth(ctx *gin.Context) {
 
 	var timeRequest yearMonthRequest
 	err := ctx.ShouldBindQuery(&timeRequest)
@@ -72,7 +67,7 @@ func (server *Server) ListPomoByMonth(ctx *gin.Context) {
 		return
 	}
 
-	rsp, err := server.listPomodoroByMonth(ctx, timeRequest)
+	rsp, err := pomo.listPomodoroByMonth(ctx, timeRequest)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
@@ -81,12 +76,12 @@ func (server *Server) ListPomoByMonth(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-func (server *Server) listPomodoroByMonth(ctx *gin.Context, timeRequest yearMonthRequest) ([][]db.GetPomodoroByDateRow, error) {
+func (pomo *pomoHandlers) listPomodoroByMonth(ctx *gin.Context, timeRequest yearMonthRequest) ([][]db.GetPomodoroByDateRow, error) {
 	date := time.Date(int(timeRequest.Year), time.Month(timeRequest.Month), 0, 0, 0, 0, 0, time.Local)
 	numberOfDate := date.Day()
 	rsp := make([][]db.GetPomodoroByDateRow, numberOfDate)
 
-	userID := getUserId(ctx)
+	userID := delivery.GetUserId(ctx)
 
 	// time.Date might get less efficient than forming a date string like: '2023-11-23'
 	for i := 0; i < numberOfDate; i++ {
@@ -97,7 +92,7 @@ func (server *Server) listPomodoroByMonth(ctx *gin.Context, timeRequest yearMont
 			Offset:    0,
 			QueryDate: date,
 		}
-		pomo, err := server.store.GetPomodoroByDate(ctx, params)
+		pomo, err := pomo.store.GetPomodoroByDate(ctx, params)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				// scan another day of the month
@@ -121,7 +116,7 @@ type listPomoByDateRequest struct {
 	PageSize int32     `form:"page_size" binding:"required,min=5,max=50"`
 }
 
-func (server *Server) ListPomoByDate(ctx *gin.Context) {
+func (pomo *pomoHandlers) ListPomoByDate(ctx *gin.Context) {
 
 	var pomoRequest listPomoByDateRequest
 	err := ctx.ShouldBindQuery(&pomoRequest)
@@ -129,7 +124,7 @@ func (server *Server) ListPomoByDate(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
-	userID := getUserId(ctx)
+	userID := delivery.GetUserId(ctx)
 	dbQueryParams := db.GetPomodoroByDateParams{
 		UserID:    userID,
 		Limit:     pomoRequest.PageSize,
@@ -137,7 +132,7 @@ func (server *Server) ListPomoByDate(ctx *gin.Context) {
 		QueryDate: pomoRequest.DateTime,
 	}
 
-	pomos, err := server.store.GetPomodoroByDate(ctx, dbQueryParams)
+	pomos, err := pomo.store.GetPomodoroByDate(ctx, dbQueryParams)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, response.ErrorResponse(err))

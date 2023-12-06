@@ -1,4 +1,4 @@
-package logging
+package authservice
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"pomodoro/util"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	gomail "gopkg.in/mail.v2"
 )
 
@@ -16,18 +15,7 @@ const (
 	VERIFICATION_CODE_LIFETIME = 4 * time.Minute
 )
 
-type EmailVerification struct {
-	store   db.Store
-	dialer  *gomail.Dialer
-	redisdb *redis.Client
-	appMail string
-}
-
-func NewEmailVerifier(store db.Store, redisdb *redis.Client, dialer *gomail.Dialer, from string) *EmailVerification {
-	return &EmailVerification{store: store, dialer: dialer, redisdb: redisdb, appMail: from}
-}
-
-func (ev *EmailVerification) Send(ctx context.Context, userEmail string) error {
+func (ev *authService) Send(ctx context.Context, userEmail string) error {
 	_, err := ev.redisdb.Get(ctx, userEmail).Result()
 	if err == nil {
 		err = errors.New("email spam, verification code has created and sent")
@@ -41,7 +29,7 @@ func (ev *EmailVerification) Send(ctx context.Context, userEmail string) error {
 	return nil
 }
 
-func (ev *EmailVerification) Verify(ctx context.Context, email, code string) (bool, error) {
+func (ev *authService) Verify(ctx context.Context, email, code string) (bool, error) {
 	if !ev.compareCode(ctx, email, code) {
 		err := errors.New("unaccepted code")
 		return false, err
@@ -55,7 +43,7 @@ func (ev *EmailVerification) Verify(ctx context.Context, email, code string) (bo
 	return true, nil
 }
 
-func (ev *EmailVerification) saveDatabase(ctx context.Context, email string) error {
+func (ev *authService) saveDatabase(ctx context.Context, email string) error {
 	_, err := ev.store.UpdateVerifyEmail(ctx, db.UpdateVerifyEmailParams{
 		Email:         email,
 		EmailVerified: true,
@@ -63,7 +51,7 @@ func (ev *EmailVerification) saveDatabase(ctx context.Context, email string) err
 	return err
 }
 
-func (ev *EmailVerification) compareCode(ctx context.Context, email, code string) bool {
+func (ev *authService) compareCode(ctx context.Context, email, code string) bool {
 
 	redisCode, err := ev.redisdb.Get(ctx, email).Result()
 	if err != nil {
@@ -83,12 +71,12 @@ func formEmailBody(code string) string {
     </body>
 	</html>`, code)
 }
-func (ev *EmailVerification) send(ctx context.Context, userEmail, code string) {
+func (ev *authService) send(ctx context.Context, userEmail, code string) {
 	m := gomail.NewMessage()
 	body := formEmailBody(code)
 
 	// Set E-Mail sender
-	m.SetHeader("From", ev.appMail)
+	m.SetHeader("From", ev.config.AppEmail)
 
 	// Set E-Mail receivers
 	m.SetHeader("To", userEmail)

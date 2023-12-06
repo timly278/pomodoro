@@ -19,3 +19,15 @@ type TokenHandlers interface {
 	RefreshToken(ctx *gin.Context)
 }
 
+type AuthHandlers interface {
+	EmailHandlers
+	UserHandlers
+	TokenHandlers
+}
+
+type PomoHandlers interface {
+	CreateNewPomodoro(ctx *gin.Context)
+	ListPomoByMonth(ctx *gin.Context)
+	ListPomoByDate(ctx *gin.Context)
+	SimpleStatisticNumber(ctx *gin.Context)
+}

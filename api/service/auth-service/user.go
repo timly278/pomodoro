@@ -1,4 +1,4 @@
-package logging
+package authservice
 
 import (
 	"context"
@@ -9,21 +9,9 @@ import (
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"pomodoro/util"
-
-	"github.com/redis/go-redis/v9"
 )
 
-type UserLogging struct {
-	store      db.Store
-	redisdb    *redis.Client // to create black list of logging out
-	tokenMaker TokenLogging
-}
-
-func NewUserLogging(store db.Store, redisdb *redis.Client) *UserLogging {
-	return &UserLogging{store: store, redisdb: redisdb}
-}
-
-func (u *UserLogging) CreateUser(ctx context.Context, req delivery.CreateUserRequest) (*db.User, error) {
+func (u *authService) CreateUser(ctx context.Context, req delivery.CreateUserRequest) (*db.User, error) {
 	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
@@ -41,7 +29,7 @@ func (u *UserLogging) CreateUser(ctx context.Context, req delivery.CreateUserReq
 	return &user, nil
 }
 
-func (u *UserLogging) Login(ctx context.Context, req delivery.LoginRequest) (tokens *response.NewTokensResponse, code int, err error) {
+func (u *authService) Login(ctx context.Context, req delivery.LoginRequest) (tokens *response.NewTokensResponse, code int, err error) {
 	user, code, err := u.GetUserByMail(ctx, req.Email)
 	if code != http.StatusFound {
 		return nil, code, err
@@ -56,7 +44,7 @@ func (u *UserLogging) Login(ctx context.Context, req delivery.LoginRequest) (tok
 		return nil, http.StatusNotAcceptable, errors.New("email has not verified")
 	}
 
-	tokens, err = u.tokenMaker.newTokens(ctx, user.ID)
+	tokens, err = u.newTokens(ctx, user.ID)
 	if err != nil {
 		return
 	}
@@ -64,13 +52,14 @@ func (u *UserLogging) Login(ctx context.Context, req delivery.LoginRequest) (tok
 }
 
 // logout
-func (u *UserLogging) Logout(ctx context.Context, accessToken string) {
+func (u *authService) Logout(ctx context.Context, accessToken string) {
 
 }
 
 // update password
 
-func (u *UserLogging) UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error) {
+// TODO: move this method to pomo-service package????
+func (u *authService) UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error) {
 	user, err := u.store.UpdateUserSetting(ctx, db.UpdateUserSettingParams{
 		ID:          userId,
 		Username:    req.Username,
@@ -90,7 +79,7 @@ func (u *UserLogging) UpdateUserSetting(ctx context.Context, userId int64, req *
 	return &rsp, nil
 }
 
-func (u *UserLogging) GetUserByMail(ctx context.Context, mail string) (user *db.User, code int, err error) {
+func (u *authService) GetUserByMail(ctx context.Context, mail string) (user *db.User, code int, err error) {
 	*user, err = u.store.GetUserByEmail(ctx, mail)
 	if err != nil {
 		if err == sql.ErrNoRows {

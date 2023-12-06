@@ -1,7 +1,8 @@
-package api
+package pomodo
 
 import (
 	"net/http"
+	"pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"strings"
@@ -20,22 +21,22 @@ type statisticNumberResponse struct {
 }
 
 // GET("/api/report")
-func (server *Server) SimpleStatisticNumber(ctx *gin.Context) {
+func (pomo *pomoHandlers) SimpleStatisticNumber(ctx *gin.Context) {
 	var timeRequest yearMonthRequest
 	err := ctx.ShouldBindQuery(&timeRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
-	userID := getUserId(ctx)
+	userID := delivery.GetUserId(ctx)
 
-	days, err := server.getDaysAccessedInMonth(ctx, userID, timeRequest)
+	days, err := pomo.getDaysAccessedInMonth(ctx, userID, timeRequest)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
 	}
 
-	minutes, err := server.getMinutesFocusedInMonth(ctx, userID, timeRequest)
+	minutes, err := pomo.getMinutesFocusedInMonth(ctx, userID, timeRequest)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
@@ -47,8 +48,8 @@ func (server *Server) SimpleStatisticNumber(ctx *gin.Context) {
 
 }
 
-func (server *Server) getDaysAccessedInMonth(ctx *gin.Context, userID int64, timeRequest yearMonthRequest) (int64, error) {
-	daysAccessed, err := server.store.GetDaysAccessedInMonth(ctx, db.GetDaysAccessedInMonthParams{
+func (pomo *pomoHandlers) getDaysAccessedInMonth(ctx *gin.Context, userID int64, timeRequest yearMonthRequest) (int64, error) {
+	daysAccessed, err := pomo.store.GetDaysAccessedInMonth(ctx, db.GetDaysAccessedInMonthParams{
 		UserID:  userID,
 		MonthID: timeRequest.Month,
 		Year:    timeRequest.Year,
@@ -60,8 +61,8 @@ func (server *Server) getDaysAccessedInMonth(ctx *gin.Context, userID int64, tim
 	return daysAccessed, nil
 }
 
-func (server *Server) getMinutesFocusedInMonth(ctx *gin.Context, userID int64, timeRequest yearMonthRequest) (int64, error) {
-	minutes, err := server.store.GetMinutesFocusedInMonth(ctx, db.GetMinutesFocusedInMonthParams{
+func (pomo *pomoHandlers) getMinutesFocusedInMonth(ctx *gin.Context, userID int64, timeRequest yearMonthRequest) (int64, error) {
+	minutes, err := pomo.store.GetMinutesFocusedInMonth(ctx, db.GetMinutesFocusedInMonthParams{
 		UserID:  userID,
 		MonthID: timeRequest.Month,
 		Year:    timeRequest.Year,

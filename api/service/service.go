@@ -21,3 +21,9 @@ type User interface {
 type TokenServer interface {
 	RefreshTokens(ctx context.Context, req delivery.RefreshTokenRequest) (*response.NewTokensResponse, error)
 }
+
+type AuthService interface {
+	EmailVerifier
+	User
+	TokenServer
+}

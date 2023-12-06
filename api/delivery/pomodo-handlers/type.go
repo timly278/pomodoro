@@ -1,8 +1,9 @@
-package api
+package pomodo
 
 import (
 	"database/sql"
 	"net/http"
+	"pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 
@@ -20,7 +21,7 @@ type createTypeRequest struct {
 	AutostartBreak    bool   `json:"autostart_break" binding:"required,boolean"`
 }
 
-func (server *Server) CreateNewPomoType(ctx *gin.Context) {
+func (pomo *pomoHandlers) CreateNewPomoType(ctx *gin.Context) {
 	var typeRequest createTypeRequest
 	err := ctx.ShouldBindJSON(&typeRequest)
 	if err != nil {
@@ -28,8 +29,8 @@ func (server *Server) CreateNewPomoType(ctx *gin.Context) {
 		return
 	}
 
-	pomotype, err := server.store.CreateNewType(ctx, db.CreateNewTypeParams{
-		UserID:            getUserId(ctx),
+	pomotype, err := pomo.store.CreateNewType(ctx, db.CreateNewTypeParams{
+		UserID:            delivery.GetUserId(ctx),
 		Name:              typeRequest.Name,
 		Color:             typeRequest.Color,
 		Goalperday:        typeRequest.Goalperday,
@@ -51,8 +52,8 @@ func (server *Server) CreateNewPomoType(ctx *gin.Context) {
 
 }
 
-func (server *Server) ListPomoType(ctx *gin.Context) {
-	types, err := server.store.ListTypes(ctx, getUserId(ctx))
+func (pomo *pomoHandlers) ListPomoType(ctx *gin.Context) {
+	types, err := pomo.store.ListTypes(ctx, delivery.GetUserId(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
@@ -60,7 +61,7 @@ func (server *Server) ListPomoType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, types)
 }
 
-func (server *Server) UpdateType(ctx *gin.Context) {
+func (pomo *pomoHandlers) UpdateType(ctx *gin.Context) {
 	var typeRequest createTypeRequest
 	err := ctx.ShouldBindJSON(&typeRequest)
 	if err != nil {
@@ -68,15 +69,15 @@ func (server *Server) UpdateType(ctx *gin.Context) {
 		return
 	}
 
-	typeId, err := getNumericObjectParam(ctx, "id")
+	typeId, err := delivery.GetNumericObjectParam(ctx, "id")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
 
-	pomotype, err := server.store.UpdateTypeById(ctx, db.UpdateTypeByIdParams{
+	pomotype, err := pomo.store.UpdateTypeById(ctx, db.UpdateTypeByIdParams{
 		ID:                typeId,
-		UserID:            getUserId(ctx),
+		UserID:            delivery.GetUserId(ctx),
 		Name:              typeRequest.Name,
 		Color:             typeRequest.Color,
 		Goalperday:        typeRequest.Goalperday,
