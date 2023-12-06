@@ -1,6 +1,7 @@
-package auth
+package security
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -34,4 +35,8 @@ func NewPayload(userid string, subject string, duration time.Duration) (*Payload
 		},
 	}
 	return &payload, nil
+}
+
+func (p *Payload) GetIntegerUserID() (int, error) {
+	return strconv.Atoi(p.RegisteredClaims.ID)
 }

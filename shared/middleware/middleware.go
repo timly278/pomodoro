@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"pomodoro/auth"
+	"pomodoro/security"
 	"pomodoro/shared/response"
 	"strconv"
 	"strings"
@@ -20,7 +20,7 @@ const (
 )
 
 // EnsureLoggedIn requires user authenticated
-func EnsureLoggedIn(tokenMaker auth.TokenMaker) gin.HandlerFunc {
+func EnsureLoggedIn(tokenMaker security.TokenMaker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		payload, err := isLoggedIn(tokenMaker, ctx)
@@ -39,7 +39,7 @@ func EnsureLoggedIn(tokenMaker auth.TokenMaker) gin.HandlerFunc {
 }
 
 // EnsureNotLoggedIn require user unauthenticated
-func EnsureNotLoggedIn(tokenMaker auth.TokenMaker) gin.HandlerFunc {
+func EnsureNotLoggedIn(tokenMaker security.TokenMaker) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		_, err := isLoggedIn(tokenMaker, ctx)
@@ -55,7 +55,7 @@ func EnsureNotLoggedIn(tokenMaker auth.TokenMaker) gin.HandlerFunc {
 }
 
 // isLoggedIn checks if the request is logged in or not
-func isLoggedIn(tokenMaker auth.TokenMaker, ctx *gin.Context) (*auth.Payload, error) {
+func isLoggedIn(tokenMaker security.TokenMaker, ctx *gin.Context) (*security.Payload, error) {
 	authHeader := ctx.GetHeader(AUTHORIZATION_HEADER_KEY)
 
 	if len(authHeader) == 0 {
@@ -76,7 +76,7 @@ func isLoggedIn(tokenMaker auth.TokenMaker, ctx *gin.Context) (*auth.Payload, er
 	}
 
 	accessToken := fields[1]
-	payload, err := tokenMaker.VerifyToken(accessToken, auth.SUBJECT_CLAIM_ACCESS_TOKEN)
+	payload, err := tokenMaker.VerifyToken(accessToken, security.SUBJECT_CLAIM_ACCESS_TOKEN)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 
 type Response struct {
 	Message string `json:"message"`
-	Data    any    `json:"any"`
+	Data    any    `json:"data"`
 }
 
 func ErrorResponse(err error) gin.H {
@@ -46,7 +46,13 @@ type UserLoginResponse struct {
 	User      UserResponse      `json:"user"`
 }
 
-func NewUserResponse(user db.User) UserResponse {
+type UserSettingResponse struct {
+	Username    string `json:"username"`
+	AlarmSound  string `json:"alarm_sound"`
+	RepeatAlarm int32  `json:"repeat_alarm"`
+}
+
+func NewUserResponse(user *db.User) UserResponse {
 	return UserResponse{
 		ID:                user.ID,
 		Username:          user.Username,
@@ -59,7 +65,7 @@ func NewUserResponse(user db.User) UserResponse {
 func LoginSuccessfully(user *db.User, newToken *NewTokensResponse) *Response {
 	userLogin := UserLoginResponse{
 		NewTokens: *newToken,
-		User:      NewUserResponse(*user),
+		User:      NewUserResponse(user),
 	}
 	return &Response{
 		Message: "login successfully",

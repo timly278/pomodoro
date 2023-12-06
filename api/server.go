@@ -58,9 +58,11 @@ func (server *Server) Start(address string) error {
 func (server *Server) Setup() {
 	router := gin.Default()
 
-	router.POST("/register", server.CreateUser)
-	router.POST("/verification", server.EmailVerification) // and login
-	router.POST("/login", middleware.EnsureNotLoggedIn(server.tokenMaker), server.UserLogin)
+	router.POST("/create-user", server.CreateUser)
+	router.POST("/login", middleware.EnsureNotLoggedIn(server.tokenMaker), Login)
+	
+	router.POST("/send-email", server.SendCode)
+	router.GET("/verify-email", server.Verify) // and login
 
 	router.POST("/refresh-token", server.RefreshToken)
 
@@ -68,7 +70,6 @@ func (server *Server) Setup() {
 	authRoutes.Use(middleware.EnsureLoggedIn(server.tokenMaker))
 
 	authRoutes.POST("/logout", server.UserLogout)
-	authRoutes.POST("/dosomething/:num", server.Dosomething)
 
 	api := authRoutes.Group("/api")
 	api.PUT("/users", server.UpdateUserSetting)
