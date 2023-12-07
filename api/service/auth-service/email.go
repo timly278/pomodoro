@@ -2,6 +2,7 @@ package authservice
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	db "pomodoro/db/sqlc"
@@ -44,9 +45,16 @@ func (ev *authService) Verify(ctx context.Context, email, code string) (bool, er
 }
 
 func (ev *authService) saveDatabase(ctx context.Context, email string) error {
-	_, err := ev.store.UpdateVerifyEmail(ctx, db.UpdateVerifyEmailParams{
-		Email:         email,
-		EmailVerified: true,
+
+	_, err := ev.store.UpdateUser(ctx, db.UpdateUserParams{
+		Email: sql.NullString{
+			String: email,
+			Valid:  true,
+		},
+		EmailVerified: sql.NullBool{
+			Bool:  true,
+			Valid: true,
+		},
 	})
 	return err
 }

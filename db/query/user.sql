@@ -15,29 +15,14 @@ WHERE email = $1 LIMIT 1;
 SELECT * FROM users
 WHERE id = $1 LIMIT 1;
 
--- name: UpdateUserSetting :one
+-- name: UpdateUser :one
 UPDATE users
-SET   username = $2,
-      alarm_sound = $3,
-      repeat_alarm = $4
-WHERE id = $1
-RETURNING *;
-
--- name: UpdateRefreshToken :one
-UPDATE users
-SET refresh_token = $2
-WHERE id = $1
-RETURNING *;
-
--- name: UpdateVerifyEmail :one
-UPDATE users
-SET email_verified = $2
-WHERE email = $1
-RETURNING *;
-
--- name: UpdatePassword :one
-UPDATE users
-SET hashed_password = $2,
-    password_changed_at = $3
-WHERE id = $1
+SET username = coalesce(sqlc.narg('username'), username),
+    refresh_token = coalesce(sqlc.narg('refresh_token'), refresh_token),
+    email_verified = coalesce(sqlc.narg('email_verified'), email_verified),
+    hashed_password = coalesce(sqlc.narg('hashed_password'), hashed_password),
+    password_changed_at = coalesce(sqlc.narg('password_changed_at'), password_changed_at),
+    alarm_sound = coalesce(sqlc.narg('alarm_sound'), alarm_sound),
+    repeat_alarm = coalesce(sqlc.narg('repeat_alarm'), repeat_alarm)
+WHERE id = coalesce(sqlc.narg('id'), 0) OR email = sqlc.narg('email')
 RETURNING *;

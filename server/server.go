@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"pomodoro/api/delivery"
 	"pomodoro/api/delivery/auth-handlers"
-	pomodo "pomodoro/api/delivery/pomo-handlers"
+	pomodo "pomodoro/api/delivery/job-handlers"
 	db "pomodoro/db/sqlc"
 	"pomodoro/security"
 	"pomodoro/util"
@@ -56,7 +56,7 @@ func NewServer(store db.Store, config *util.Config) (*Server, error) {
 func (s *Server) Run(address string) {
 	router := gin.Default()
 	authHandlers := auth.NewAuthHandlers(s.store, s.tokenMaker, s.redisdb, s.dialer, s.config)
-	pomoHandlers := pomodo.NewPomoHandlers(s.store)
+	jobHandlers := pomodo.NewPomoHandlers(s.store)
 	delivery.MapAuthRoutes(router.Group("api/v1/auth"), authHandlers)
-	delivery.MapPomoRoutes(router.Group("api/v1/app"), pomoHandlers)
+	delivery.MapPomoRoutes(router.Group("api/v1/job"), jobHandlers)
 }

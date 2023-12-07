@@ -27,3 +27,13 @@ type AuthService interface {
 	User
 	TokenServer
 }
+
+type PomodoService interface {
+	CreatePomodoro(ctx context.Context, userId int64, req *delivery.CreatePomodoroRequest) (*db.Pomodoro, error)
+	GetPomodorosByDates(ctx context.Context, userId int64, req *delivery.GetPomodorosRequest) ([]db.GetPomodorosRow, error)
+	GetMinutesFocused(ctx context.Context, userId int64, req *delivery.GetStatisticRequest) (int64, error)
+	GetDaysAccessed(ctx context.Context, userId int64, req *delivery.GetStatisticRequest) (int64, error)
+	GetTypes(ctx context.Context, userId int64) ([]db.Type, error)
+	CreateNewType(ctx context.Context, userId int64, req *delivery.CreateNewTypeRequest) (db.Type, error)
+	UpdateType(ctx context.Context, userId int64, typeId int64, req *delivery.CreateNewTypeRequest) (db.Type, error)
+}

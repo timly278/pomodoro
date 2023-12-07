@@ -7,7 +7,7 @@ package db
 
 import (
 	"context"
-	"time"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -93,124 +93,43 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
-const updatePassword = `-- name: UpdatePassword :one
+const updateUser = `-- name: UpdateUser :one
 UPDATE users
-SET hashed_password = $2,
-    password_changed_at = $3
-WHERE id = $1
+SET username = coalesce($1, username),
+    refresh_token = coalesce($2, refresh_token),
+    email_verified = coalesce($3, email_verified),
+    hashed_password = coalesce($4, hashed_password),
+    password_changed_at = coalesce($5, password_changed_at),
+    alarm_sound = coalesce($6, alarm_sound),
+    repeat_alarm = coalesce($7, repeat_alarm)
+WHERE id = coalesce($8, 0) OR email = $9
 RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
 `
 
-type UpdatePasswordParams struct {
-	ID                int64     `json:"id"`
-	HashedPassword    string    `json:"hashed_password"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
+type UpdateUserParams struct {
+	Username          sql.NullString `json:"username"`
+	RefreshToken      sql.NullString `json:"refresh_token"`
+	EmailVerified     sql.NullBool   `json:"email_verified"`
+	HashedPassword    sql.NullString `json:"hashed_password"`
+	PasswordChangedAt sql.NullTime   `json:"password_changed_at"`
+	AlarmSound        sql.NullString `json:"alarm_sound"`
+	RepeatAlarm       sql.NullInt32  `json:"repeat_alarm"`
+	ID                sql.NullInt64  `json:"id"`
+	Email             sql.NullString `json:"email"`
 }
 
-func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updatePassword, arg.ID, arg.HashedPassword, arg.PasswordChangedAt)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.HashedPassword,
-		&i.Email,
-		&i.PasswordChangedAt,
-		&i.CreatedAt,
-		&i.AlarmSound,
-		&i.RepeatAlarm,
-		&i.EmailVerified,
-		&i.RefreshToken,
-		&i.SessionState,
-	)
-	return i, err
-}
-
-const updateRefreshToken = `-- name: UpdateRefreshToken :one
-UPDATE users
-SET refresh_token = $2
-WHERE id = $1
-RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
-`
-
-type UpdateRefreshTokenParams struct {
-	ID           int64  `json:"id"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-func (q *Queries) UpdateRefreshToken(ctx context.Context, arg UpdateRefreshTokenParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateRefreshToken, arg.ID, arg.RefreshToken)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.HashedPassword,
-		&i.Email,
-		&i.PasswordChangedAt,
-		&i.CreatedAt,
-		&i.AlarmSound,
-		&i.RepeatAlarm,
-		&i.EmailVerified,
-		&i.RefreshToken,
-		&i.SessionState,
-	)
-	return i, err
-}
-
-const updateUserSetting = `-- name: UpdateUserSetting :one
-UPDATE users
-SET   username = $2,
-      alarm_sound = $3,
-      repeat_alarm = $4
-WHERE id = $1
-RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
-`
-
-type UpdateUserSettingParams struct {
-	ID          int64  `json:"id"`
-	Username    string `json:"username"`
-	AlarmSound  string `json:"alarm_sound"`
-	RepeatAlarm int32  `json:"repeat_alarm"`
-}
-
-func (q *Queries) UpdateUserSetting(ctx context.Context, arg UpdateUserSettingParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateUserSetting,
-		arg.ID,
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser,
 		arg.Username,
+		arg.RefreshToken,
+		arg.EmailVerified,
+		arg.HashedPassword,
+		arg.PasswordChangedAt,
 		arg.AlarmSound,
 		arg.RepeatAlarm,
+		arg.ID,
+		arg.Email,
 	)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.HashedPassword,
-		&i.Email,
-		&i.PasswordChangedAt,
-		&i.CreatedAt,
-		&i.AlarmSound,
-		&i.RepeatAlarm,
-		&i.EmailVerified,
-		&i.RefreshToken,
-		&i.SessionState,
-	)
-	return i, err
-}
-
-const updateVerifyEmail = `-- name: UpdateVerifyEmail :one
-UPDATE users
-SET email_verified = $2
-WHERE email = $1
-RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
-`
-
-type UpdateVerifyEmailParams struct {
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-}
-
-func (q *Queries) UpdateVerifyEmail(ctx context.Context, arg UpdateVerifyEmailParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, updateVerifyEmail, arg.Email, arg.EmailVerified)
 	var i User
 	err := row.Scan(
 		&i.ID,

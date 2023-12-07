@@ -11,37 +11,7 @@ import (
 	"time"
 )
 
-const createPomodoroWithNoTask = `-- name: CreatePomodoroWithNoTask :one
-INSERT INTO pomodoros (
-  user_id,
-  type_id,
-  focus_degree
-) VALUES (
-  $1, $2, $3
-) RETURNING id, user_id, type_id, task_id, focus_degree, created_at
-`
-
-type CreatePomodoroWithNoTaskParams struct {
-	UserID      int64 `json:"user_id"`
-	TypeID      int64 `json:"type_id"`
-	FocusDegree int32 `json:"focus_degree"`
-}
-
-func (q *Queries) CreatePomodoroWithNoTask(ctx context.Context, arg CreatePomodoroWithNoTaskParams) (Pomodoro, error) {
-	row := q.db.QueryRowContext(ctx, createPomodoroWithNoTask, arg.UserID, arg.TypeID, arg.FocusDegree)
-	var i Pomodoro
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.TypeID,
-		&i.TaskID,
-		&i.FocusDegree,
-		&i.CreatedAt,
-	)
-	return i, err
-}
-
-const createPomodoroWithTask = `-- name: CreatePomodoroWithTask :one
+const createPomodoro = `-- name: CreatePomodoro :one
 INSERT INTO pomodoros (
   user_id,
   type_id,
@@ -52,15 +22,15 @@ INSERT INTO pomodoros (
 ) RETURNING id, user_id, type_id, task_id, focus_degree, created_at
 `
 
-type CreatePomodoroWithTaskParams struct {
+type CreatePomodoroParams struct {
 	UserID      int64         `json:"user_id"`
 	TypeID      int64         `json:"type_id"`
 	TaskID      sql.NullInt64 `json:"task_id"`
 	FocusDegree int32         `json:"focus_degree"`
 }
 
-func (q *Queries) CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoroWithTaskParams) (Pomodoro, error) {
-	row := q.db.QueryRowContext(ctx, createPomodoroWithTask,
+func (q *Queries) CreatePomodoro(ctx context.Context, arg CreatePomodoroParams) (Pomodoro, error) {
+	row := q.db.QueryRowContext(ctx, createPomodoro,
 		arg.UserID,
 		arg.TypeID,
 		arg.TaskID,
@@ -78,78 +48,96 @@ func (q *Queries) CreatePomodoroWithTask(ctx context.Context, arg CreatePomodoro
 	return i, err
 }
 
-const getPomodoroByDate = `-- name: GetPomodoroByDate :many
-SELECT t.id as type_id, p.focus_degree
-FROM pomodoros p, types t 
-WHERE t.id = p.type_id
-AND (p.created_at::DATE) = $4::DATE AND p.user_id = $1
-ORDER BY p.type_id
+const getDaysAccessed = `-- name: GetDaysAccessed :one
+SELECT count(*) FROM
+(
+  SELECT EXTRACT(day FROM created_at) as day FROM pomodoros 
+  WHERE user_id = $1
+  AND (p.created_at::DATE) >= $2::DATE 
+  AND (p.created_at::DATE) <= $3::DATE 
+  GROUP BY day
+) as x LIMIT 1
+`
+
+type GetDaysAccessedParams struct {
+	UserID   int64     `json:"user_id"`
+	FromDate time.Time `json:"from_date"`
+	ToDate   time.Time `json:"to_date"`
+}
+
+func (q *Queries) GetDaysAccessed(ctx context.Context, arg GetDaysAccessedParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getDaysAccessed, arg.UserID, arg.FromDate, arg.ToDate)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getMinutesFocused = `-- name: GetMinutesFocused :one
+SELECT SUM(duration) as minutefocused FROM
+(
+  SELECT t.duration, p.created_at, p.type_id, p.user_id FROM 
+	types as t, pomodoros as p
+	WHERE t.id = p.type_id 
+	AND p.user_id = $1 
+  AND (p.created_at::DATE) >= $2::DATE 
+  AND (p.created_at::DATE) <= $3::DATE 
+) as x LIMIT 1
+`
+
+type GetMinutesFocusedParams struct {
+	UserID   int64     `json:"user_id"`
+	FromDate time.Time `json:"from_date"`
+	ToDate   time.Time `json:"to_date"`
+}
+
+func (q *Queries) GetMinutesFocused(ctx context.Context, arg GetMinutesFocusedParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getMinutesFocused, arg.UserID, arg.FromDate, arg.ToDate)
+	var minutefocused int64
+	err := row.Scan(&minutefocused)
+	return minutefocused, err
+}
+
+const getPomodoros = `-- name: GetPomodoros :many
+SELECT type_id, focus_degree, created_at::DATE
+FROM pomodoros p 
+WHERE (p.created_at::DATE) >= $4::DATE 
+AND (p.created_at::DATE) <= $5::DATE 
+AND p.user_id = $1
+ORDER BY p.created_at::DATE, p.type_id
 LIMIT $2
 OFFSET $3
 `
 
-type GetPomodoroByDateParams struct {
-	UserID    int64     `json:"user_id"`
-	Limit     int32     `json:"limit"`
-	Offset    int32     `json:"offset"`
-	QueryDate time.Time `json:"query_date"`
+type GetPomodorosParams struct {
+	UserID   int64     `json:"user_id"`
+	Limit    int32     `json:"limit"`
+	Offset   int32     `json:"offset"`
+	FromDate time.Time `json:"from_date"`
+	ToDate   time.Time `json:"to_date"`
 }
 
-type GetPomodoroByDateRow struct {
-	TypeID      int64 `json:"type_id"`
-	FocusDegree int32 `json:"focus_degree"`
+type GetPomodorosRow struct {
+	TypeID      int64     `json:"type_id"`
+	FocusDegree int32     `json:"focus_degree"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
-func (q *Queries) GetPomodoroByDate(ctx context.Context, arg GetPomodoroByDateParams) ([]GetPomodoroByDateRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPomodoroByDate,
+func (q *Queries) GetPomodoros(ctx context.Context, arg GetPomodorosParams) ([]GetPomodorosRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPomodoros,
 		arg.UserID,
 		arg.Limit,
 		arg.Offset,
-		arg.QueryDate,
+		arg.FromDate,
+		arg.ToDate,
 	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetPomodoroByDateRow{}
+	items := []GetPomodorosRow{}
 	for rows.Next() {
-		var i GetPomodoroByDateRow
-		if err := rows.Scan(&i.TypeID, &i.FocusDegree); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPomodoroByUserId = `-- name: GetPomodoroByUserId :many
-SELECT id, user_id, type_id, task_id, focus_degree, created_at FROM pomodoros
-WHERE user_id = $1 LIMIT 1
-`
-
-func (q *Queries) GetPomodoroByUserId(ctx context.Context, userID int64) ([]Pomodoro, error) {
-	rows, err := q.db.QueryContext(ctx, getPomodoroByUserId, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Pomodoro{}
-	for rows.Next() {
-		var i Pomodoro
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.TypeID,
-			&i.TaskID,
-			&i.FocusDegree,
-			&i.CreatedAt,
-		); err != nil {
+		var i GetPomodorosRow
+		if err := rows.Scan(&i.TypeID, &i.FocusDegree, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -2,6 +2,7 @@ package authservice
 
 import (
 	"context"
+	"database/sql"
 	"pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/security"
@@ -11,10 +12,8 @@ import (
 )
 
 const (
-	REFRESH_TOKEN_FAKE = ""
+	REVOKED_REFRESH_TOKEN = ""
 )
-
-
 
 func (t *authService) RefreshTokens(ctx context.Context, req delivery.RefreshTokenRequest) (*response.NewTokensResponse, error) {
 	userId, err := t.validateRefreshToken(ctx, req.RefreshToken)
@@ -40,11 +39,17 @@ func (t *authService) newTokens(ctx context.Context, userId int64) (rsp *respons
 		return
 	}
 
-	params := db.UpdateRefreshTokenParams{
-		ID:           userId,
-		RefreshToken: refreshToken,
+	params := db.UpdateUserParams{
+		ID: sql.NullInt64{
+			Int64: userId,
+			Valid: true,
+		},
+		RefreshToken: sql.NullString{
+			String: refreshToken,
+			Valid:  true,
+		},
 	}
-	_, err = t.store.UpdateRefreshToken(ctx, params)
+	_, err = t.store.UpdateUser(ctx, params)
 	if err != nil {
 		return
 	}
@@ -85,9 +90,15 @@ func (t *authService) validateRefreshToken(ctx context.Context, rToken string) (
 }
 
 func (t *authService) revokeRefreshToken(ctx context.Context, userId int64) (err error) {
-	_, err = t.store.UpdateRefreshToken(ctx, db.UpdateRefreshTokenParams{
-		ID:           userId,
-		RefreshToken: REFRESH_TOKEN_FAKE,
+	_, err = t.store.UpdateUser(ctx, db.UpdateUserParams{
+		ID: sql.NullInt64{
+			Int64: userId,
+			Valid: true,
+		},
+		RefreshToken: sql.NullString{
+			String: REVOKED_REFRESH_TOKEN,
+			Valid:  true,
+		},
 	})
 	return
 }
