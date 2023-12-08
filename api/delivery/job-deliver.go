@@ -10,4 +10,5 @@ type JobHandlers interface {
 	CreateNewPomoType(ctx *gin.Context)
 	GetPomoType(ctx *gin.Context)
 	UpdatePomoType(ctx *gin.Context)
+	UpdateUserSetting(ctx *gin.Context)
 }

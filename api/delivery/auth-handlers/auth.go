@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"pomodoro/api/delivery"
 	"pomodoro/api/service"
 	authservice "pomodoro/api/service/auth-service"
 	db "pomodoro/db/sqlc"
@@ -14,6 +15,8 @@ import (
 type authHandlers struct {
 	authService service.AuthService
 }
+
+var _ delivery.AuthHandlers = (*authHandlers)(nil)
 
 func NewAuthHandlers(store db.Store,
 	tokenMaker security.TokenMaker,

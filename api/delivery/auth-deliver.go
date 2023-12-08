@@ -12,7 +12,6 @@ type UserHandlers interface {
 	Login(ctx *gin.Context)
 	Logout(ctx *gin.Context)
 	UpdatePassword(ctx *gin.Context)
-	UpdateUserSetting(ctx *gin.Context)
 }
 
 type TokenHandlers interface {

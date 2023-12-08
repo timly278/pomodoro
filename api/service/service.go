@@ -17,7 +17,6 @@ type User interface {
 	Login(ctx context.Context, req *delivery.LoginRequest) (tokens *response.NewTokensResponse, code int, err error)
 	GetUserByMail(ctx context.Context, mail string) (*db.User, int, error)
 	GetUserById(ctx context.Context, userId int64) (user *db.User, code int, err error)
-	UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error)
 }
 
 type TokenServer interface {
@@ -38,4 +37,5 @@ type JobsService interface {
 	GetTypes(ctx context.Context, userId int64) ([]db.Type, error)
 	CreateNewType(ctx context.Context, userId int64, req *delivery.CreateNewTypeRequest) (db.Type, error)
 	UpdateType(ctx context.Context, userId int64, typeId int64, req *delivery.CreateNewTypeRequest) (db.Type, error)
+	UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error)
 }

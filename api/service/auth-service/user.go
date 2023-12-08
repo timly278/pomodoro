@@ -56,42 +56,6 @@ func (u *authService) Logout(ctx context.Context, accessToken string) {
 
 }
 
-// update password
-
-// TODO: move this method to pomo-service package????
-// TODO: improve this function to be able to reveive any change from clients
-func (u *authService) UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error) {
-	user, err := u.store.UpdateUser(ctx, db.UpdateUserParams{
-		ID: sql.NullInt64{
-			Int64: userId,
-			Valid: true,
-		},
-		Username: sql.NullString{
-			String: req.Username,
-			Valid:  true,
-		},
-		AlarmSound: sql.NullString{
-			String: req.AlarmSound,
-			Valid:  true,
-		},
-		RepeatAlarm: sql.NullInt32{
-			Int32: req.RepeatAlarm,
-			Valid: true,
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	rsp := response.UserSettingResponse{
-		Username:    user.Username,
-		AlarmSound:  user.AlarmSound,
-		RepeatAlarm: user.RepeatAlarm,
-	}
-
-	return &rsp, nil
-}
-
 func (u *authService) GetUserByMail(ctx context.Context, mail string) (*db.User, int, error) {
 
 	user, err := u.store.GetUserByEmail(ctx, mail)

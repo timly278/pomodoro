@@ -63,23 +63,4 @@ func (u *authHandlers) UpdatePassword(ctx *gin.Context) {
 	})
 }
 
-func (u *authHandlers) UpdateUserSetting(ctx *gin.Context) {
-	var req delivery.UpdateUserSettingRequest
 
-	err := ctx.ShouldBindJSON(&req)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
-		return
-	}
-
-	newSetting, err := u.authService.UpdateUserSetting(ctx, delivery.GetUserId(ctx), &req)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
-		return
-	}
-
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "update setting successfully",
-		Data:    newSetting,
-	})
-}
