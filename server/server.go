@@ -57,6 +57,8 @@ func (s *Server) Run(address string) {
 	router := gin.Default()
 	authHandlers := auth.NewAuthHandlers(s.store, s.tokenMaker, s.redisdb, s.dialer, s.config)
 	jobHandlers := pomodo.NewPomoHandlers(s.store)
-	delivery.MapAuthRoutes(router.Group("api/v1/auth"), authHandlers)
-	delivery.MapPomoRoutes(router.Group("api/v1/job"), jobHandlers)
+	delivery.MapAuthRoutes(router.Group("api/v1/auth"), authHandlers,s.tokenMaker )
+	delivery.MapPomoRoutes(router.Group("api/v1/job"), jobHandlers, s.tokenMaker)
+
+	router.Run(address)
 }

@@ -11,7 +11,7 @@ import (
 	"pomodoro/util"
 )
 
-func (u *authService) CreateUser(ctx context.Context, req delivery.CreateUserRequest) (*db.User, error) {
+func (u *authService) CreateUser(ctx context.Context, req *delivery.CreateUserRequest) (*db.User, error) {
 	hashedPassword, err := util.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (u *authService) CreateUser(ctx context.Context, req delivery.CreateUserReq
 	return &user, nil
 }
 
-func (u *authService) Login(ctx context.Context, req delivery.LoginRequest) (tokens *response.NewTokensResponse, code int, err error) {
+func (u *authService) Login(ctx context.Context, req *delivery.LoginRequest) (*response.NewTokensResponse, int, error) {
 	user, code, err := u.GetUserByMail(ctx, req.Email)
 	if code != http.StatusFound {
 		return nil, code, err
@@ -44,11 +44,11 @@ func (u *authService) Login(ctx context.Context, req delivery.LoginRequest) (tok
 		return nil, http.StatusNotAcceptable, errors.New("email has not verified")
 	}
 
-	tokens, err = u.newTokens(ctx, user.ID)
+	tokens, err := u.newTokens(ctx, user.ID)
 	if err != nil {
-		return
+		return nil, http.StatusInternalServerError, err
 	}
-	return
+	return tokens, http.StatusOK, nil
 }
 
 // logout
@@ -92,14 +92,27 @@ func (u *authService) UpdateUserSetting(ctx context.Context, userId int64, req *
 	return &rsp, nil
 }
 
-func (u *authService) GetUserByMail(ctx context.Context, mail string) (user *db.User, code int, err error) {
-	*user, err = u.store.GetUserByEmail(ctx, mail)
+func (u *authService) GetUserByMail(ctx context.Context, mail string) (*db.User, int, error) {
+
+	user, err := u.store.GetUserByEmail(ctx, mail)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			code = http.StatusNotFound
+			return nil, http.StatusNotFound, err
 		}
-		code = http.StatusInternalServerError
+		return nil, http.StatusInternalServerError, err
 	}
-	code = http.StatusFound
-	return
+
+	return &user, http.StatusFound, err
+}
+
+func (u *authService) GetUserById(ctx context.Context, userId int64) (*db.User, int, error) {
+	user, err := u.store.GetUserById(ctx, userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, http.StatusNotFound, err
+		}
+		return nil, http.StatusInternalServerError, err
+	}
+
+	return &user, http.StatusFound, err
 }

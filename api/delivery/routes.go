@@ -1,21 +1,35 @@
 package delivery
 
 import (
+	"pomodoro/security"
+	"pomodoro/shared/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
-func MapAuthRoutes(group *gin.RouterGroup, h AuthHandlers) {
+func MapAuthRoutes(group *gin.RouterGroup, h AuthHandlers, tokenMaker security.TokenMaker) {
 	group.POST("/refresh-token", h.RefreshToken)
 	group.POST("/send-email", h.SendCode)
 	group.GET("/verify-email", h.Verify)
 	group.POST("/create-user", h.CreateUser)
 	group.POST("/login", h.Login)
-	group.POST("/logout", h.Logout)
-	group.PUT("/update-password", h.UpdatePassword)
+
+	group.POST("/logout", middleware.EnsureLoggedIn(tokenMaker), h.Logout) // need middleware
+	group.PUT("/update-password", middleware.EnsureLoggedIn(tokenMaker), h.UpdatePassword)
+	group.PUT("/update-user-setting", middleware.EnsureLoggedIn(tokenMaker), h.UpdateUserSetting) // need middleware
 	// TODO: group.PUT("/reset-password", h.UpdatePassword) // forget password
-	group.PUT("/update-user-setting", h.UpdateUserSetting)
 }
 
-func MapPomoRoutes(group *gin.RouterGroup, h JobHandlers) {
+func MapPomoRoutes(group *gin.RouterGroup, h JobHandlers, tokenMaker security.TokenMaker) {
+	group.Use(middleware.EnsureLoggedIn(tokenMaker))
 
+	group.POST("/pomodoros", h.CreateNewPomodoro)
+	group.GET("/pomodoros", h.ListPomodorosByDates)
+
+	group.POST("/types", h.CreateNewPomoType)
+	group.PUT("/types/:id", h.UpdatePomoType)
+	group.GET("/types", h.GetPomoType)
+
+	group.GET("/focused-minutes", h.GetMinutesFocused)
+	group.GET("/accessed-days", h.GetDaysAccessed)
 }

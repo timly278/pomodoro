@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"pomodoro/api/delivery"
+	delivery "pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 )
@@ -13,8 +13,10 @@ type EmailVerifier interface {
 }
 
 type User interface {
-	CreateUser(ctx context.Context, req delivery.CreateUserRequest) (*db.User, error)
+	CreateUser(ctx context.Context, req *delivery.CreateUserRequest) (*db.User, error)
+	Login(ctx context.Context, req *delivery.LoginRequest) (tokens *response.NewTokensResponse, code int, err error)
 	GetUserByMail(ctx context.Context, mail string) (*db.User, int, error)
+	GetUserById(ctx context.Context, userId int64) (user *db.User, code int, err error)
 	UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error)
 }
 
@@ -28,7 +30,7 @@ type AuthService interface {
 	TokenServer
 }
 
-type PomodoService interface {
+type JobsService interface {
 	CreatePomodoro(ctx context.Context, userId int64, req *delivery.CreatePomodoroRequest) (*db.Pomodoro, error)
 	GetPomodorosByDates(ctx context.Context, userId int64, req *delivery.GetPomodorosRequest) ([]db.GetPomodorosRow, error)
 	GetMinutesFocused(ctx context.Context, userId int64, req *delivery.GetStatisticRequest) (int64, error)

@@ -16,8 +16,8 @@ func GetUserId(ctx *gin.Context) int64 {
 func GetNumericObjectParam(ctx *gin.Context, key string) (int64, error) {
 	id := ctx.Param(key)
 	x, err := strconv.Atoi(id)
-	if err != nil {
-		return 0, fmt.Errorf("invalid key, %s should be a number greater than zero", key)
+	if err != nil || x <= 0 {
+		return 0, fmt.Errorf("invalid key, %s should be a number and greater than zero", key)
 	}
 	return int64(x), nil
 }

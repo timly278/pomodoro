@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"pomodoro/api/delivery"
 	"pomodoro/shared/response"
@@ -19,7 +20,8 @@ func (t *authHandlers) RefreshToken(ctx *gin.Context) {
 	newTokens, err := t.authService.RefreshTokens(ctx, req)
 	if err != nil {
 		// TODO: improve error handling
-		ctx.JSON(http.StatusUnauthorized, err)
+		fmt.Printf("handler-err : %v\n", err)
+		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		return
 	}
 

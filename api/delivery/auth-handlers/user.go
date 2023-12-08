@@ -16,7 +16,7 @@ func (u *authHandlers) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := u.authService.CreateUser(ctx, req)
+	user, err := u.authService.CreateUser(ctx, &req)
 	if err != nil {
 		// TODO: handle specific error i.e sql.NoRowErr
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
@@ -39,6 +39,16 @@ func (u *authHandlers) Login(ctx *gin.Context) {
 		return
 	}
 
+	rsp, code, err := u.authService.Login(ctx, &req)
+	if err != nil {
+		ctx.JSON(code, response.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response.Response{
+		Message: "loggin successfully",
+		Data:    rsp,
+	})
 }
 
 func (u *authHandlers) Logout(ctx *gin.Context) {

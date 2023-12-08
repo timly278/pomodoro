@@ -35,6 +35,7 @@ func createPomo(t *testing.T, userID, typeID, taskID64 int64) Pomodoro {
 
 func TestCreatePomodoroWithTask(t *testing.T) {
 	user := createNewUser(t)
+	user.ID = 49
 	pomotype := createNewPomoType(t, user)
 	pomotask := createNewPomomTask(t, user)
 	newpomo := createPomo(t, user.ID, pomotype.ID, pomotask.ID)
@@ -43,6 +44,7 @@ func TestCreatePomodoroWithTask(t *testing.T) {
 
 func TestCreatePomodoroWitNoTask(t *testing.T) {
 	user := createNewUser(t)
+	user.ID = 49
 	pomotype := createNewPomoType(t, user)
 	newpomo := createPomo(t, user.ID, pomotype.ID, 0)
 	fmt.Printf("newpomo = %v\n", newpomo)

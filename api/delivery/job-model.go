@@ -9,8 +9,8 @@ type CreatePomodoroRequest struct {
 }
 
 type GetPomodorosRequest struct {
-	FromDate time.Time `form:"date_time" binding:"required" validate:"required,rfc3339"`
-	ToDate   time.Time `form:"date_time" binding:"required" validate:"required,rfc3339"`
+	FromDate time.Time `form:"from_date" binding:"required" validate:"required,rfc3339"`
+	ToDate   time.Time `form:"to_date" binding:"required" validate:"required,rfc3339"`
 	PageID   int32     `form:"page_id" binding:"required,min=1"`
 	PageSize int32     `form:"page_size" binding:"required,min=1"`
 }
@@ -30,4 +30,3 @@ type CreateNewTypeRequest struct {
 	Longbreakinterval int32  `json:"longbreakinterval" binding:"required,min=1"`
 	AutostartBreak    bool   `json:"autostart_break" binding:"required,boolean"`
 }
-

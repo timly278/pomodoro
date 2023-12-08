@@ -6,6 +6,6 @@ type jobService struct {
 	store db.Store
 }
 
-func NewPomoService(store db.Store) *jobService {
+func NewJobService(store db.Store) *jobService {
 	return &jobService{store: store}
 }

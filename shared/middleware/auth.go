@@ -23,17 +23,23 @@ const (
 func EnsureLoggedIn(tokenMaker security.TokenMaker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		payload, err := isLoggedIn(tokenMaker, ctx)
+		payload, err := getPayload(tokenMaker, ctx)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
 
-		i, err := strconv.Atoi(payload.RegisteredClaims.ID)
+		id, err := strconv.Atoi(payload.RegisteredClaims.ID)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
+
+		// user, code, err := authS.GetUserById(ctx, int64(id))
+		// if code != http.StatusFound {
+		// 	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+		// }
+		// _ = user
 		ctx.Set(AUTHORIZATION_PAYLOAD_KEY, payload)
-		ctx.Set(AUTHORIZATION_USERID_KEY, int64(i))
+		ctx.Set(AUTHORIZATION_USERID_KEY, int64(id))
 		ctx.Next()
 	}
 }
@@ -42,7 +48,7 @@ func EnsureLoggedIn(tokenMaker security.TokenMaker) gin.HandlerFunc {
 func EnsureNotLoggedIn(tokenMaker security.TokenMaker) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
-		_, err := isLoggedIn(tokenMaker, ctx)
+		_, err := getPayload(tokenMaker, ctx)
 		if err == nil {
 			// user already logged in
 			// redirect to another page then abort the request
@@ -55,7 +61,7 @@ func EnsureNotLoggedIn(tokenMaker security.TokenMaker) gin.HandlerFunc {
 }
 
 // isLoggedIn checks if the request is logged in or not
-func isLoggedIn(tokenMaker security.TokenMaker, ctx *gin.Context) (*security.Payload, error) {
+func getPayload(tokenMaker security.TokenMaker, ctx *gin.Context) (*security.Payload, error) {
 	authHeader := ctx.GetHeader(AUTHORIZATION_HEADER_KEY)
 
 	if len(authHeader) == 0 {

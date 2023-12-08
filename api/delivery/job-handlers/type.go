@@ -17,7 +17,7 @@ func (pomo *jobHandlers) CreateNewPomoType(ctx *gin.Context) {
 		return
 	}
 
-	pomotype, err := pomo.pomoService.CreateNewType(ctx, delivery.GetUserId(ctx), &req)
+	pomotype, err := pomo.jobService.CreateNewType(ctx, delivery.GetUserId(ctx), &req)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
@@ -30,7 +30,7 @@ func (pomo *jobHandlers) CreateNewPomoType(ctx *gin.Context) {
 }
 
 func (pomo *jobHandlers) GetPomoType(ctx *gin.Context) {
-	types, err := pomo.pomoService.GetTypes(ctx, delivery.GetUserId(ctx))
+	types, err := pomo.jobService.GetTypes(ctx, delivery.GetUserId(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		return
@@ -56,7 +56,7 @@ func (pomo *jobHandlers) UpdatePomoType(ctx *gin.Context) {
 		return
 	}
 	userId := delivery.GetUserId(ctx)
-	pomotype, err := pomo.pomoService.UpdateType(ctx, userId, typeId, &req)
+	pomotype, err := pomo.jobService.UpdateType(ctx, userId, typeId, &req)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, response.ErrorResponse(err))

@@ -102,7 +102,7 @@ SET username = coalesce($1, username),
     password_changed_at = coalesce($5, password_changed_at),
     alarm_sound = coalesce($6, alarm_sound),
     repeat_alarm = coalesce($7, repeat_alarm)
-WHERE id = coalesce($8, 0) OR email = $9
+WHERE id = coalesce($8, 0) OR email = coalesce($9, '')
 RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
 `
 

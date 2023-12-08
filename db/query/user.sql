@@ -24,5 +24,5 @@ SET username = coalesce(sqlc.narg('username'), username),
     password_changed_at = coalesce(sqlc.narg('password_changed_at'), password_changed_at),
     alarm_sound = coalesce(sqlc.narg('alarm_sound'), alarm_sound),
     repeat_alarm = coalesce(sqlc.narg('repeat_alarm'), repeat_alarm)
-WHERE id = coalesce(sqlc.narg('id'), 0) OR email = sqlc.narg('email')
+WHERE id = coalesce(sqlc.narg('id'), 0) OR email = coalesce(sqlc.narg('email'), '')
 RETURNING *;

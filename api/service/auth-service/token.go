@@ -3,6 +3,8 @@ package authservice
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/security"
@@ -28,15 +30,15 @@ func (t *authService) RefreshTokens(ctx context.Context, req delivery.RefreshTok
 	return newTokens, nil
 }
 
-func (t *authService) newTokens(ctx context.Context, userId int64) (rsp *response.NewTokensResponse, err error) {
+func (t *authService) newTokens(ctx context.Context, userId int64) (*response.NewTokensResponse, error) {
 	accessToken, err := newAccessToken(t.tokenMaker, t.config, userId)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	refreshToken, err := newRefreshToken(t.tokenMaker, t.config, userId)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	params := db.UpdateUserParams{
@@ -51,16 +53,16 @@ func (t *authService) newTokens(ctx context.Context, userId int64) (rsp *respons
 	}
 	_, err = t.store.UpdateUser(ctx, params)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	rsp = &response.NewTokensResponse{
+	rsp := &response.NewTokensResponse{
 		RefreshToken: refreshToken,
 		RTExpireIn:   int64(t.config.RefreshTokenDuration.Seconds()),
 		AccessToken:  accessToken,
 		ATExpireIn:   int64(t.config.AccessTokenDuration.Seconds()),
 	}
-	return
+	return rsp, nil
 }
 
 func (t *authService) validateRefreshToken(ctx context.Context, rToken string) (userid int64, err error) {
@@ -83,7 +85,11 @@ func (t *authService) validateRefreshToken(ctx context.Context, rToken string) (
 
 	if user.RefreshToken != rToken {
 		err = t.revokeRefreshToken(ctx, user.ID)
-		return
+		if err != nil {
+			//logger
+			return 0, err
+		}
+		return 0, errors.New("detected reusing fresh-token")
 	}
 
 	return int64(userId), nil
@@ -100,6 +106,7 @@ func (t *authService) revokeRefreshToken(ctx context.Context, userId int64) (err
 			Valid:  true,
 		},
 	})
+	fmt.Printf("err : %v\n", err)
 	return
 }
 
