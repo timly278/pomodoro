@@ -16,12 +16,13 @@ func MapAuthRoutes(group *gin.RouterGroup, h AuthHandlers, tokenMaker security.T
 
 	group.POST("/logout", middleware.EnsureLoggedIn(tokenMaker), h.Logout) // need middleware
 	group.PUT("/update-password", middleware.EnsureLoggedIn(tokenMaker), h.UpdatePassword)
+
 	// TODO: group.PUT("/reset-password", h.UpdatePassword) // forget password
 }
 
 func MapJobsRoutes(group *gin.RouterGroup, h JobHandlers, tokenMaker security.TokenMaker) {
 	group.Use(middleware.EnsureLoggedIn(tokenMaker))
-	
+
 	group.PUT("/update-user-setting", h.UpdateUserSetting) // need middleware
 	group.POST("/pomodoros", h.CreateNewPomodoro)
 	group.GET("/pomodoros", h.ListPomodorosByDates)

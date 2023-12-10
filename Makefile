@@ -29,7 +29,7 @@ sqlc:
 	sqlc generate
 
 server:
-	go run ./cmd/main.go
+	go run main.go
 .PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc server
 
 network:

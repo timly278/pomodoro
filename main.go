@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	db "pomodoro/db/sqlc"
+	_ "pomodoro/docs"
 	"pomodoro/server"
 	"pomodoro/util"
 
@@ -13,6 +14,12 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
+// @title           Pomodoro API
+// @version         1.0
+// @description     This is an pomodoro application.
+
+// @host      localhost:8080
+// @BasePath  /api/v1
 func main() {
 
 	config, err := util.LoadConfig(".")

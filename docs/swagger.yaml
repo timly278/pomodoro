@@ -1,0 +1,89 @@
+basePath: /api/v1
+definitions:
+  delivery.SendCodeRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  delivery.VerificationRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is an pomodoro application.
+  title: Pomodoro API
+  version: "1.0"
+paths:
+  /api/v1/auth:
+    get:
+      consumes:
+      - application/json
+      description: Verify code that sent over email
+      parameters:
+      - description: verify code
+        in: body
+        name: verificationRequest
+        required: true
+        schema:
+          $ref: '#/definitions/delivery.VerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: email has been verified successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Verify code
+      tags:
+      - lybatuTags
+  /api/v1/auth/send-email:
+    post:
+      consumes:
+      - application/json
+      description: Send verification code
+      parameters:
+      - description: lybatu send code
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/delivery.SendCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 'error: bad request'
+          schema:
+            type: string
+        "406":
+          description: 'error: unacceptable'
+          schema:
+            type: string
+      summary: Send email for verification code
+      tags:
+      - auth
+swagger: "2.0"
