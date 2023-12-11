@@ -16,7 +16,7 @@ const (
 	VERIFICATION_CODE_LIFETIME = 4 * time.Minute
 )
 
-func (ev *authService) Send(ctx context.Context, userEmail string) error {
+func (ev *authService) SendEmailVerification(ctx context.Context, userEmail string) error {
 	_, err := ev.redisdb.Get(ctx, userEmail).Result()
 	if err == nil {
 		err = errors.New("email spam, verification code has created and sent")
@@ -30,7 +30,7 @@ func (ev *authService) Send(ctx context.Context, userEmail string) error {
 	return nil
 }
 
-func (ev *authService) Verify(ctx context.Context, email, code string) (bool, error) {
+func (ev *authService) VerifyCode(ctx context.Context, email, code string) (bool, error) {
 	if !ev.compareCode(ctx, email, code) {
 		err := errors.New("unaccepted code")
 		return false, err

@@ -3,12 +3,12 @@ package delivery
 import "github.com/gin-gonic/gin"
 
 type EmailHandlers interface {
-	SendCode(ctx *gin.Context)
-	Verify(ctx *gin.Context)
+	SendEmailVerification(ctx *gin.Context)
+	VerifyCode(ctx *gin.Context)
 }
 
 type UserHandlers interface {
-	CreateUser(ctx *gin.Context)
+	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	Logout(ctx *gin.Context)
 	UpdatePassword(ctx *gin.Context)

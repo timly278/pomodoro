@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (u *authHandlers) CreateUser(ctx *gin.Context) {
+func (u *authHandlers) Register(ctx *gin.Context) {
 	var req delivery.CreateUserRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -16,16 +16,21 @@ func (u *authHandlers) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := u.authService.CreateUser(ctx, &req)
+	user, statusCode, err := u.userService.CreateUser(ctx, &req)
 	if err != nil {
-		// TODO: handle specific error i.e sql.NoRowErr
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(statusCode, response.ErrorResponse(err))
+		return
+	}
+
+	err = u.authService.SendEmailVerification(ctx, req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(err))
 		return
 	}
 
 	rsp := response.NewUserResponse(user)
 	ctx.JSON(http.StatusOK, response.Response{
-		Message: "create new user successfully",
+		Message: "register successfully, waiting for email verification.",
 		Data:    rsp,
 	})
 }
