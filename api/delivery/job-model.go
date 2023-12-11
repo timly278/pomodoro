@@ -11,8 +11,8 @@ type CreatePomodoroRequest struct {
 type GetPomodorosRequest struct {
 	FromDate time.Time `form:"from_date" binding:"required" validate:"required,rfc3339"`
 	ToDate   time.Time `form:"to_date" binding:"required" validate:"required,rfc3339"`
-	PageID   int32     `form:"page_id" binding:"required,min=1"`
-	PageSize int32     `form:"page_size" binding:"required,min=1"`
+	Page     int32     `form:"page" binding:"required,min=1"`
+	Limit    int32     `form:"limit" binding:"required,min=1"`
 }
 
 type GetStatisticRequest struct {

@@ -25,8 +25,8 @@ func (p *jobService) CreatePomodoro(ctx context.Context, userId int64, req *deli
 func (p *jobService) GetPomodorosByDates(ctx context.Context, userId int64, req *delivery.GetPomodorosRequest) ([]db.GetPomodorosRow, error) {
 	queryParams := db.GetPomodorosParams{
 		UserID:   userId,
-		Limit:    req.PageSize,
-		Offset:   (req.PageID - 1) * req.PageSize,
+		Limit:    req.Limit,
+		Offset:   (req.Page - 1) * req.Limit,
 		FromDate: req.FromDate,
 		ToDate:   req.ToDate,
 	}

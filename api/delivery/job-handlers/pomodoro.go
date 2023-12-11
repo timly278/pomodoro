@@ -1,4 +1,4 @@
-package pomodo
+package jobs
 
 import (
 	"database/sql"
