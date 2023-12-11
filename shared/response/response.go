@@ -1,30 +1,13 @@
 package response
 
 import (
-	"fmt"
 	db "pomodoro/db/sqlc"
-	"strings"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
-}
-
-func ErrorResponse(err error) gin.H {
-	if strings.Contains(err.Error(), "\n") {
-		errs := strings.SplitAfter(err.Error(), "\n")
-		maping := make(map[string]any)
-		for i, e := range errs {
-			maping[fmt.Sprintf("error_%d", i+1)] = e
-		}
-		return maping
-	} else {
-		return gin.H{"error": err.Error()}
-	}
 }
 
 type UserResponse struct {
@@ -59,16 +42,5 @@ func NewUserResponse(user *db.User) UserResponse {
 		Email:             user.Email,
 		PasswordChangedAt: user.PasswordChangedAt,
 		CreatedAt:         user.CreatedAt,
-	}
-}
-
-func LoginSuccessfully(user *db.User, newToken *NewTokensResponse) *Response {
-	userLogin := UserLoginResponse{
-		NewTokens: *newToken,
-		User:      NewUserResponse(user),
-	}
-	return &Response{
-		Message: "login successfully",
-		Data:    userLogin,
 	}
 }

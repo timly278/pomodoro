@@ -9,9 +9,9 @@ import (
 
 func MapAuthRoutes(group *gin.RouterGroup, h AuthHandlers, tokenMaker security.TokenMaker) {
 	group.POST("/refresh-token", h.RefreshToken)
-	group.POST("/send-email", h.SendCode)
-	group.GET("/verify-email", h.Verify)
-	group.POST("/create-user", h.CreateUser)
+	group.POST("/send-emailverification", h.SendEmailVerification)
+	group.GET("/verify-code", h.VerifyCode)
+	group.POST("/register", h.Register)
 	group.POST("/login", h.Login)
 
 	group.POST("/logout", middleware.EnsureLoggedIn(tokenMaker), h.Logout) // need middleware
