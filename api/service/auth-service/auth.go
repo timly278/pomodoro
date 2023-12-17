@@ -25,7 +25,7 @@ func NewAuthService(
 	tokenMaker security.TokenMaker,
 	redisdb *redis.Client,
 	dialer *gomail.Dialer,
-	conf *util.Config) *authService {
+	conf *util.Config) service.AuthService {
 
 	return &authService{
 		userService: userservice.NewUserService(store),

@@ -7,7 +7,6 @@ import (
 	"pomodoro/shared/response"
 )
 
-
 type UserService interface {
 	CreateUser(ctx context.Context, req *delivery.CreateUserRequest) (*db.User, int, error)
 	UpdateUserSetting(ctx context.Context, userId int64, req *delivery.UpdateUserSettingRequest) (*response.UserSettingResponse, error)

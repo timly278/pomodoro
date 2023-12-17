@@ -1,3 +1,8 @@
+startDB:
+	docker start postgrestulb2
+startRedis:
+	docker start rdbtulb2
+
 postgres:
 	docker run --name postgrestulb2 -p 5432:5432 -e POSTGRES_PASSWORD=tulb -e  POSTGRES_USER=root -d postgres
 
@@ -30,7 +35,7 @@ sqlc:
 
 server:
 	go run main.go
-.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc server
+.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc server startDB startRedis
 
 network:
 	docker network create -d bridge mynetwork

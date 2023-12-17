@@ -3,9 +3,6 @@ package jobs
 import (
 	"pomodoro/api/delivery"
 	"pomodoro/api/service"
-	jobservice "pomodoro/api/service/job-service"
-	userservice "pomodoro/api/service/user-service"
-	db "pomodoro/db/sqlc"
 )
 
 type jobHandlers struct {
@@ -15,8 +12,6 @@ type jobHandlers struct {
 
 var _ delivery.JobHandlers = (*jobHandlers)(nil)
 
-func NewPomoHandlers(store db.Store) *jobHandlers {
-	job := jobservice.NewJobService(store)
-	user := userservice.NewUserService(store)
+func NewJobHandlers(job service.JobsService, user service.UserService) delivery.JobHandlers {
 	return &jobHandlers{jobService: job, userService: user}
 }

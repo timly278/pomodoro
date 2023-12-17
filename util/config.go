@@ -22,19 +22,24 @@ type Config struct {
 	RedisDb              int           `mapstructure:"REDIS_DB"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
+func LoadConfig(path string) (*Config, error) {
+	var config Config
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env") // you can use json/xml here if you want so as long it has correct format
 
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	err = viper.Unmarshal(&config)
-	return
+	if err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 
 }

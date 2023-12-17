@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"pomodoro/api/delivery"
+	"pomodoro/api/service"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
 	"pomodoro/util"
@@ -16,7 +17,7 @@ type userService struct {
 	store db.Store
 }
 
-func NewUserService(store db.Store) *userService {
+func NewUserService(store db.Store) service.UserService {
 	return &userService{store: store}
 }
 
