@@ -45,6 +45,7 @@ func NewServer() (
 		log.Println("cannot load config:", err)
 		return
 	}
+	fmt.Println(config)
 	dataBase, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Println("cannot open data base.", err)

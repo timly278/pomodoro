@@ -25,7 +25,7 @@ import (
 // @BasePath  /api/v1
 func main() {
 
-	app := Fx()
+	app := fxApp()
 	// In a typical application, we could just use app.Run() here. Since we
 	// don't want this example to run forever, we'll use the more-explicit Start
 	// and Stop.
@@ -43,15 +43,15 @@ func main() {
 
 }
 
-func Fx() *fx.App {
+func fxApp() *fx.App {
 	return fx.New(
 		fx.Provide(
+			server.NewServer,
 			jobservice.NewJobService,
 			authservice.NewAuthService,
 			userservice.NewUserService,
 			jobs.NewJobHandlers,
 			auth.NewAuthHandlers,
-			server.NewServer,
 		),
 		fx.Invoke(
 			delivery.MapAuthRoutes,
