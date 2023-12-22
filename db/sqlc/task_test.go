@@ -8,13 +8,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-func createNewPomomTask(t *testing.T, user User) Task{
+func createNewPomomTask(t *testing.T, user User) Task {
 
 	params := CreateNewTaskParams{
-		UserID: user.ID,
-		Content: util.RandomString(15),
-		Status: int32(util.RandomInt(0, 2)),
+		UserID:        user.ID,
+		Content:       util.RandomString(15),
+		Status:        int32(util.RandomInt(0, 2)),
 		EstimatePomos: int32(util.RandomInt(1, 10)),
 		ProgressPomos: 0,
 	}
