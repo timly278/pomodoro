@@ -33,9 +33,12 @@ migrateup1:
 sqlc:
 	sqlc generate
 
+test:
+	go test -v ./...
+
 server:
 	go run main.go
-.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc server startDB startRedis
+.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc test server startDB startRedis
 
 network:
 	docker network create -d bridge mynetwork
