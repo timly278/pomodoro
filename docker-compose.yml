@@ -44,7 +44,7 @@ services:
       - pomoVol:/data
 
 volumes:
-  pomoVol:
+  pomoVol: 
 
 networks:
   mynetwork:
