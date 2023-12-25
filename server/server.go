@@ -1,10 +1,10 @@
 package server
 
 import (
+	"crypto/tls"
+	"database/sql"
 	"fmt"
-	"pomodoro/api/delivery"
-	"pomodoro/api/delivery/auth-handlers"
-	pomodo "pomodoro/api/delivery/job-handlers"
+	"log"
 	db "pomodoro/db/sqlc"
 	_ "pomodoro/docs"
 	"pomodoro/security"
@@ -21,43 +21,63 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 )
 
-type Server struct {
-	store      db.Store
-	tokenMaker security.TokenMaker
-	config     *util.Config
-	dialer     *gomail.Dialer
-	redisdb    *redis.Client
-	// logger
-}
+// type Server struct {
+// 	store      db.Store
+// 	tokenMaker security.TokenMaker
+// 	config     *util.Config
+// 	dialer     *gomail.Dialer
+// 	redisdb    *redis.Client
+// 	// logger
+// }
 
-func NewServer(store db.Store, config *util.Config, dialer *gomail.Dialer, redisDb *redis.Client) (*Server, error) {
+func NewServer() (
+	router *gin.Engine,
+	store db.Store,
+	tokenMaker security.TokenMaker,
+	config *util.Config,
+	dialer *gomail.Dialer,
+	redisDb *redis.Client,
+	err error,
+) {
 
-	tokenMaker, err := security.NewJwtTokenMaker(config.TokenSymmetricKey)
+	config, err = util.LoadConfig(".")
 	if err != nil {
-		return nil, fmt.Errorf("cannot create token maker: %w", err)
+		log.Println("cannot load config:", err)
+		return
 	}
+	fmt.Println(config)
+	dataBase, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Println("cannot open data base.", err)
+	}
+	// Create Redis Client
+	redisDb = redis.NewClient(&redis.Options{
+		Addr:     config.RedisClientAddress,
+		Password: config.RedisDbPassword,
+		DB:       config.RedisDb,
+	})
 
-	return &Server{
-		store:      store,
-		tokenMaker: tokenMaker,
-		config:     config,
-		dialer:     dialer,
-		redisdb:    redisDb,
-	}, nil
+	// Settings for SMTP server
+	dialer = gomail.NewDialer(config.AppSmtpHost, config.AppSmtpPort, config.AppEmail, config.AppPassword)
+	// This is only needed when SSL/TLS certificate is not valid on server.
+	// In production this should be set to false.
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	store = db.NewSQLStore(dataBase)
+
+	tokenMaker, err = security.NewJwtTokenMaker(config.TokenSymmetricKey)
+	if err != nil {
+		err = fmt.Errorf("cannot create token maker: %w", err)
+		return
+	}
+	router = gin.Default()
+
+	return
 }
 
-func (s *Server) Run(address string) {
-	router := gin.Default()
-	authHandlers := auth.NewAuthHandlers(s.store, s.tokenMaker, s.redisdb, s.dialer, s.config)
-	jobHandlers := pomodo.NewPomoHandlers(s.store)
-
-	auths := router.Group("api/v1/auth")
-	delivery.MapAuthRoutes(auths, authHandlers, s.tokenMaker)
-
-	jobs := router.Group("api/v1/jobs")
-	delivery.MapJobsRoutes(jobs, jobHandlers, s.tokenMaker)
+func Run(router *gin.Engine, config *util.Config) {
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	router.Run(address)
+	router.Run(config.ServerAddress)
 }

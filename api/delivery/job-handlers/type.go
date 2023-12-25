@@ -1,10 +1,12 @@
-package pomodo
+package jobs
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"pomodoro/api/delivery"
 	"pomodoro/shared/response"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -50,7 +52,7 @@ func (pomo *jobHandlers) UpdatePomoType(ctx *gin.Context) {
 		return
 	}
 
-	typeId, err := delivery.GetNumericObjectParam(ctx, "id")
+	typeId, err := getNumericObjectParam(ctx, "id")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
@@ -67,4 +69,14 @@ func (pomo *jobHandlers) UpdatePomoType(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, pomotype)
 
+}
+
+// getObjectId returns error if the request is bad
+func getNumericObjectParam(ctx *gin.Context, key string) (int64, error) {
+	id := ctx.Param(key)
+	x, err := strconv.Atoi(id)
+	if err != nil || x <= 0 {
+		return 0, fmt.Errorf("invalid key, %s should be a number and greater than zero", key)
+	}
+	return int64(x), nil
 }

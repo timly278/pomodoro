@@ -1,6 +1,7 @@
 package authservice
 
 import (
+	"pomodoro/api/service"
 	db "pomodoro/db/sqlc"
 	"pomodoro/security"
 	"pomodoro/util"
@@ -10,23 +11,27 @@ import (
 )
 
 type authService struct {
-	store      db.Store
-	tokenMaker security.TokenMaker
-	dialer     *gomail.Dialer
-	redisdb    *redis.Client
-	config     *util.Config
+	userService service.UserService
+	store       db.Store
+	tokenMaker  security.TokenMaker
+	dialer      *gomail.Dialer
+	redisdb     *redis.Client
+	config      *util.Config
 }
 
 func NewAuthService(
 	store db.Store,
+	userService service.UserService,
 	tokenMaker security.TokenMaker,
 	redisdb *redis.Client,
 	dialer *gomail.Dialer,
-	conf *util.Config) *authService {
+	conf *util.Config) service.AuthService {
+
 	return &authService{
-		store:      store,
-		tokenMaker: tokenMaker,
-		dialer:     dialer,
-		redisdb:    redisdb,
-		config:     conf}
+		userService: userService,
+		store:       store,
+		tokenMaker:  tokenMaker,
+		dialer:      dialer,
+		redisdb:     redisdb,
+		config:      conf}
 }

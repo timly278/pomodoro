@@ -1,17 +1,20 @@
 package main
 
 import (
-	"crypto/tls"
-	"database/sql"
+	"context"
 	"log"
-	db "pomodoro/db/sqlc"
+	"pomodoro/api/delivery"
+	"pomodoro/api/delivery/auth-handlers"
+	jobs "pomodoro/api/delivery/job-handlers"
+	authservice "pomodoro/api/service/auth-service"
+	jobservice "pomodoro/api/service/job-service"
+	userservice "pomodoro/api/service/user-service"
 	_ "pomodoro/docs"
 	"pomodoro/server"
-	"pomodoro/util"
+	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/redis/go-redis/v9"
-	gomail "gopkg.in/mail.v2"
+	"go.uber.org/fx"
 )
 
 // @title           Pomodoro API
@@ -22,34 +25,39 @@ import (
 // @BasePath  /api/v1
 func main() {
 
-	config, err := util.LoadConfig(".")
-	if err != nil {
-		log.Println("cannot load config:", err)
-		return
-	}
-	dataBase, err := sql.Open(config.DBDriver, config.DBSource)
-	if err != nil {
-		log.Println("cannot open data base.", err)
-	}
-	// Create Redis Client
-	redisDb := redis.NewClient(&redis.Options{
-		Addr:     config.RedisClientAddress,
-		Password: config.RedisDbPassword,
-		DB:       config.RedisDb,
-	})
-
-	// Settings for SMTP server
-	dialer := gomail.NewDialer(config.AppSmtpHost, config.AppSmtpPort, config.AppEmail, config.AppPassword)
-	// This is only needed when SSL/TLS certificate is not valid on server.
-	// In production this should be set to false.
-	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-
-	store := db.NewSQLStore(dataBase)
-	server, err := server.NewServer(store, &config, dialer, redisDb)
-	if err != nil {
-		log.Println("cannot create server", err)
+	app := fxApp()
+	// In a typical application, we could just use app.Run() here. Since we
+	// don't want this example to run forever, we'll use the more-explicit Start
+	// and Stop.
+	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := app.Start(startCtx); err != nil {
+		log.Fatal(err)
 	}
 
-	server.Run(config.ServerAddress)
+	stopCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := app.Stop(stopCtx); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+func fxApp() *fx.App {
+	return fx.New(
+		fx.Provide(
+			server.NewServer,
+			jobservice.NewJobService,
+			authservice.NewAuthService,
+			userservice.NewUserService,
+			jobs.NewJobHandlers,
+			auth.NewAuthHandlers,
+		),
+		fx.Invoke(
+			delivery.MapAuthRoutes,
+			delivery.MapJobsRoutes,
+			server.Run,
+		),
+	)
 
 }

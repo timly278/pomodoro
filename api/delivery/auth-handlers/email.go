@@ -21,7 +21,7 @@ import (
 //	@Failure		400			{string}	string	"Bad Request"
 //	@Failure		406			{string}	string	"Unacceptable"
 //	@Router			/api/v1/auth/send-email [post]
-func (eh *authHandlers) SendCode(ctx *gin.Context) {
+func (eh *authHandlers) SendEmailVerification(ctx *gin.Context) {
 
 	// TODO: do I need to write some middleware to protect this kind of API?
 
@@ -32,7 +32,7 @@ func (eh *authHandlers) SendCode(ctx *gin.Context) {
 		return
 	}
 
-	err = eh.authService.Send(ctx, req.Email)
+	err = eh.authService.SendEmailVerification(ctx, req.Email)
 	if err != nil {
 		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(err))
 		return
@@ -56,7 +56,7 @@ func (eh *authHandlers) SendCode(ctx *gin.Context) {
 //	@Success		200	{object}		response.Response "email has been verified successfully"
 //	@Failure		400	{string}		"Bad Request"
 //	@Router			/api/v1/auth [get]
-func (eh *authHandlers) Verify(ctx *gin.Context) {
+func (eh *authHandlers) VerifyCode(ctx *gin.Context) {
 	var req delivery.VerificationRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
@@ -64,11 +64,14 @@ func (eh *authHandlers) Verify(ctx *gin.Context) {
 		return
 	}
 
-	ok, err := eh.authService.Verify(ctx, req.Email, req.Code)
+	ok, err := eh.authService.VerifyCode(ctx, req.Email, req.Code)
 	if !ok {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
 		return
 	}
+
+// TODO: how do I let user log-in while Verification Request only contains email, not password?
+// Does client store password somewhere in memory?
 
 	ctx.JSON(http.StatusOK, response.Response{
 		Message: "email has been verified successfully",
