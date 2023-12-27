@@ -4,7 +4,8 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+  - name: pull request
+      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
 
 jobs:
 
@@ -29,7 +30,10 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
       with:
         mask-password: 'false'
- 
+
+    - name: load secrets and save to app.env
+      uses: aws secretsmanager get-secret-value --secret-id pomodoro_secret --query SecretString --output text | jq -r 'to_entries | map("\(.key)=\(.value)") | .[]' > app.env
+
     - name: Build, tag, and push docker image to Amazon ECR
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
