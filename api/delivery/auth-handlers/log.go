@@ -8,6 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (u *authHandlers) Home(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"Home":"Hello World!",
+	})
+}
+
 func (u *authHandlers) Register(ctx *gin.Context) {
 	var req delivery.CreateUserRequest
 	err := ctx.ShouldBindJSON(&req)
