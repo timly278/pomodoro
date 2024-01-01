@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.21.2-alpine3.18 AS build-stage
+FROM --platform=amd64 golang:alpine3.18 AS build-stage
 
 WORKDIR /app4
 
@@ -10,12 +10,13 @@ RUN go mod download
 
 COPY . .
 
+
 RUN go get
 
 RUN go build -o ./main .
 
 #Run stage
-FROM alpine:3.18 AS run-stage
+FROM --platform=amd64 golang:alpine3.18 AS run-stage
 
 WORKDIR /app4
 

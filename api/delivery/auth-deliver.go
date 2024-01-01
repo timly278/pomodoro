@@ -3,6 +3,7 @@ package delivery
 import "github.com/gin-gonic/gin"
 
 type AuthHandlers interface {
+	Home(ctx *gin.Context)
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	Logout(ctx *gin.Context)

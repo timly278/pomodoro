@@ -41,6 +41,7 @@ missing types:
 2023/12/17 15:33:53 missing dependencies for function "pomodoro/api/delivery".MapAuthRoutes (/Users/timly/Workspace/Code/Go-Project/pomodoro/api/delivery/routes.go:10): missing types: *gin.Engine; delivery.AuthHandlers (did you mean *auth.authHandlers?)
 */
 func MapAuthRoutes(route *gin.Engine, h AuthHandlers, tokenMaker security.TokenMaker) {
+	route.GET("/", h.Home)
 	group := route.Group("api/v1/auth")
 	group.POST("/refresh-token", h.RefreshToken)
 	group.POST("/send-emailverification", h.SendEmailVerification)
