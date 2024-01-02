@@ -6,11 +6,12 @@ import (
 	"pomodoro/shared/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func (u *authHandlers) Home(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
-		"Home":"Hello World!",
+		"Home": "Hello World!",
 	})
 }
 
@@ -39,6 +40,11 @@ func (u *authHandlers) Register(ctx *gin.Context) {
 		Message: "register successfully, waiting for email verification.",
 		Data:    rsp,
 	})
+	u.logger.Info(
+		"New user registered successfully.",
+		zap.String("username", rsp.Username),
+		zap.String("email", rsp.Email),
+	)
 }
 
 func (u *authHandlers) Login(ctx *gin.Context) {
@@ -60,6 +66,10 @@ func (u *authHandlers) Login(ctx *gin.Context) {
 		Message: "loggin successfully",
 		Data:    rsp,
 	})
+	u.logger.Info(
+		"User loggin",
+		zap.String("email", req.Email),
+	)
 }
 
 func (u *authHandlers) Logout(ctx *gin.Context) {
