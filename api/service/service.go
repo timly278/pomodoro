@@ -5,6 +5,7 @@ import (
 	delivery "pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/shared/response"
+	"time"
 )
 
 type UserService interface {
@@ -18,9 +19,10 @@ type UserService interface {
 type AuthService interface {
 	RefreshTokens(ctx context.Context, req delivery.RefreshTokenRequest) (*response.NewTokensResponse, error)
 	Login(ctx context.Context, req *delivery.LoginRequest) (tokens *response.NewTokensResponse, code int, err error)
-	// Logout
+	Logout(ctx context.Context) error
 	SendEmailVerification(ctx context.Context, userEmail string) error
 	VerifyCode(ctx context.Context, email, code string) (bool, error)
+	AddAccessTokenToBlackList(ctx context.Context, userId string, accessToken string, expires_at time.Time)
 }
 
 type JobsService interface {

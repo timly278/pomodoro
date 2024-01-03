@@ -108,3 +108,13 @@ func (ev *authService) send(ctx context.Context, userEmail, code string) {
 	}
 
 }
+
+func (as *authService) AddAccessTokenToBlackList(ctx context.Context, userId string, accessToken string, expires_at time.Time) {
+
+
+	err := as.redisdb.Set(ctx, accessToken, userId, VERIFICATION_CODE_LIFETIME).Err()
+	if err != nil {
+		// TODO: log error
+		return
+	}
+}

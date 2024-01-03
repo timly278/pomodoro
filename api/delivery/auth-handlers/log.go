@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"pomodoro/api/delivery"
 	"pomodoro/shared/response"
@@ -77,7 +78,8 @@ func (u *authHandlers) Register(ctx *gin.Context) {
 //	@Router			/auth/login [post]
 func (u *authHandlers) Login(ctx *gin.Context) {
 	var req delivery.LoginRequest
-
+	fmt.Println("client IP:", ctx.ClientIP())
+	fmt.Println("UserAgent:", ctx.Request.UserAgent())
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
@@ -101,9 +103,13 @@ func (u *authHandlers) Login(ctx *gin.Context) {
 }
 
 func (u *authHandlers) Logout(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, response.Response{
-		Message: "not implemented feature",
-	})
+	err := u.authService.Logout(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "loggout successfully"})
 }
 
 func (u *authHandlers) UpdatePassword(ctx *gin.Context) {

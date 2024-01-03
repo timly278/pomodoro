@@ -17,7 +17,7 @@ INSERT INTO users (
   email
 ) VALUES (
   $1, $2, $3
-) RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
+) RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, is_blocked
 `
 
 type CreateUserParams struct {
@@ -40,13 +40,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.RepeatAlarm,
 		&i.EmailVerified,
 		&i.RefreshToken,
-		&i.SessionState,
+		&i.IsBlocked,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state FROM users
+SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, is_blocked FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -64,13 +64,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.RepeatAlarm,
 		&i.EmailVerified,
 		&i.RefreshToken,
-		&i.SessionState,
+		&i.IsBlocked,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state FROM users
+SELECT id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, is_blocked FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -88,7 +88,7 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 		&i.RepeatAlarm,
 		&i.EmailVerified,
 		&i.RefreshToken,
-		&i.SessionState,
+		&i.IsBlocked,
 	)
 	return i, err
 }
@@ -101,9 +101,10 @@ SET username = coalesce($1, username),
     hashed_password = coalesce($4, hashed_password),
     password_changed_at = coalesce($5, password_changed_at),
     alarm_sound = coalesce($6, alarm_sound),
-    repeat_alarm = coalesce($7, repeat_alarm)
-WHERE id = coalesce($8, 0) OR email = coalesce($9, '')
-RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, session_state
+    repeat_alarm = coalesce($7, repeat_alarm),
+    is_blocked = coalesce($8, is_blocked)
+WHERE id = coalesce($9, 0) OR email = coalesce($10, '')
+RETURNING id, username, hashed_password, email, password_changed_at, created_at, alarm_sound, repeat_alarm, email_verified, refresh_token, is_blocked
 `
 
 type UpdateUserParams struct {
@@ -114,6 +115,7 @@ type UpdateUserParams struct {
 	PasswordChangedAt sql.NullTime   `json:"password_changed_at"`
 	AlarmSound        sql.NullString `json:"alarm_sound"`
 	RepeatAlarm       sql.NullInt32  `json:"repeat_alarm"`
+	IsBlocked         sql.NullBool   `json:"is_blocked"`
 	ID                sql.NullInt64  `json:"id"`
 	Email             sql.NullString `json:"email"`
 }
@@ -127,6 +129,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.PasswordChangedAt,
 		arg.AlarmSound,
 		arg.RepeatAlarm,
+		arg.IsBlocked,
 		arg.ID,
 		arg.Email,
 	)
@@ -142,7 +145,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.RepeatAlarm,
 		&i.EmailVerified,
 		&i.RefreshToken,
-		&i.SessionState,
+		&i.IsBlocked,
 	)
 	return i, err
 }
