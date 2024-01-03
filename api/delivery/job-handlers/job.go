@@ -13,6 +13,8 @@ type jobHandlers struct {
 	logger      *zap.Logger
 }
 
+// H is shortcut of map[string]any
+
 var _ delivery.JobHandlers = (*jobHandlers)(nil)
 
 func NewJobHandlers(job service.JobsService, user service.UserService, logger *zap.Logger) delivery.JobHandlers {

@@ -15,6 +15,20 @@ func (u *authHandlers) Home(ctx *gin.Context) {
 	})
 }
 
+// Register godoc
+//
+//	@Summary		New user registers
+//	@Description	Create new user and send verification code to email
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			NewUser 	body		delivery.CreateUserRequest true "Create new user"
+//	@Success		200			{object}	response.Response
+//	@Failure		400			{object}	gin.H	"Bad Request"
+//	@Failure		406			{object}	gin.H "email spam, verification code has created and sent"
+//	@Failure		409			{object}	gin.H "email existed"
+//	@Failure		500			{object}	gin.H "internal serever error"
+//	@Router			/auth/register [post]
 func (u *authHandlers) Register(ctx *gin.Context) {
 	var req delivery.CreateUserRequest
 	err := ctx.ShouldBindJSON(&req)
@@ -47,6 +61,20 @@ func (u *authHandlers) Register(ctx *gin.Context) {
 	)
 }
 
+// Login godoc
+//
+//	@Summary		Loggin user
+//	@Description	Loggin user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user 	body		delivery.LoginRequest true "user login"
+//	@Success		200		{object}	response.Response
+//	@Failure		400		{object}	gin.H	"Bad Request"
+//	@Failure		403		{object}	gin.H "password does not match"
+//	@Failure		406		{object}	gin.H "email has not verified"
+//	@Failure		500		{object}	gin.H "internal serever error"
+//	@Router			/auth/login [post]
 func (u *authHandlers) Login(ctx *gin.Context) {
 	var req delivery.LoginRequest
 
@@ -80,6 +108,6 @@ func (u *authHandlers) Logout(ctx *gin.Context) {
 
 func (u *authHandlers) UpdatePassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotImplemented, response.Response{
-		Message: "not implemented feature",
+		Message: "c",
 	})
 }

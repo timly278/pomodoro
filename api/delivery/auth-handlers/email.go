@@ -9,18 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SendCode godoc
+// SendEmailVerification godoc
 //
 //	@Summary		Send email for verification code
 //	@Description	Send verification code
 //	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			email body  delivery.SendCodeRequest  true "lybatu send code"
-//	@Success		200			{object}	response.Response
-//	@Failure		400			{string}	string	"Bad Request"
-//	@Failure		406			{string}	string	"Unacceptable"
-//	@Router			/api/v1/auth/send-email [post]
+//	@Param			email	body		delivery.SendCodeRequest	true	"send code"
+//	@Success		200		{object}	response.Response
+//	@Failure		400		{object}	gin.H	"Bad Request"
+//	@Failure		406		{object}	gin.H 	"email spam, verification code has created and sent"
+//	@Failure		500		{object}	gin.H 	"internal serever error"
+//	@Router			/auth/send-emailverification [post]
 func (eh *authHandlers) SendEmailVerification(ctx *gin.Context) {
 
 	// TODO: do I need to write some middleware to protect this kind of API?
@@ -45,17 +46,17 @@ func (eh *authHandlers) SendEmailVerification(ctx *gin.Context) {
 
 }
 
-// Verify godoc
+// VerifyCode godoc
 //
-//	@Summary		Verify code
+//	@Summary		Verify email verification code
 //	@Description	Verify code that sent over email
-//	@Tags			lybatuTags
+//	@Tags			auth
 //	@Accept			json
 //	@Produce		json
-//	@Param			verificationRequest	body delivery.VerificationRequest true "verify code"
-//	@Success		200	{object}		response.Response "email has been verified successfully"
-//	@Failure		400	{string}		"Bad Request"
-//	@Router			/api/v1/auth [get]
+//	@Param			Email&Code	body		delivery.VerificationRequest	true	"verify code"
+//	@Failure		400			{object}	gin.H				"Bad Request"
+//	@Success		200			{object}	response.Response	"email has been verified successfully"
+//	@Router			/auth/verify-code [post]
 func (eh *authHandlers) VerifyCode(ctx *gin.Context) {
 	var req delivery.VerificationRequest
 	err := ctx.ShouldBindJSON(&req)
@@ -70,8 +71,8 @@ func (eh *authHandlers) VerifyCode(ctx *gin.Context) {
 		return
 	}
 
-// TODO: how do I let user log-in while Verification Request only contains email, not password?
-// Does client store password somewhere in memory?
+	// TODO: how do I let user log-in while Verification Request only contains email, not password?
+	// Does client store password somewhere in memory?
 
 	ctx.JSON(http.StatusOK, response.Response{
 		Message: "email has been verified successfully",

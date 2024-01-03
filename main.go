@@ -17,12 +17,12 @@ import (
 	"go.uber.org/fx"
 )
 
-// @title           Pomodoro API
-// @version         1.0
-// @description     This is an pomodoro application.
+//	@title			Pomodoro API
+//	@version		1.0
+//	@description	Pomodoro Application Api Server. This app helps people study and work at better productivity.
 
-// @host      localhost:8080
-// @BasePath  /api/v1
+// @host		localhost:8080
+// @BasePath	/api/v1
 func main() {
 
 	app := fxApp()

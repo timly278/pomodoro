@@ -36,9 +36,12 @@ sqlc:
 test:
 	go test -v ./...
 
+swag:
+	swag init --pdl 1
+
 server:
 	go run main.go
-.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc test server startDB startRedis
+.PHONY: postgres createdb dropdb migratecreate migrateup migratedown1 migrateup1 sqlc test server startDB startRedis swag
 
 network:
 	docker network create -d bridge mynetwork

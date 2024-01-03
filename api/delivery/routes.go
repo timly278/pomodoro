@@ -45,10 +45,11 @@ func MapAuthRoutes(route *gin.Engine, h AuthHandlers, tokenMaker security.TokenM
 	group := route.Group("api/v1/auth")
 	group.POST("/refresh-token", h.RefreshToken)
 	group.POST("/send-emailverification", h.SendEmailVerification)
-	group.GET("/verify-code", h.VerifyCode)
+	group.POST("/verify-code", h.VerifyCode)
 	group.POST("/register", h.Register)
 	group.POST("/login", h.Login)
 
+	// TODO: not implemented feature
 	group.POST("/logout", middleware.EnsureLoggedIn(tokenMaker), h.Logout) // need middleware
 	group.PUT("/update-password", middleware.EnsureLoggedIn(tokenMaker), h.UpdatePassword)
 
