@@ -4,11 +4,12 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"fmt"
-	"log"
 	db "pomodoro/db/sqlc"
 	_ "pomodoro/docs"
 	"pomodoro/security"
 	"pomodoro/util"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -37,19 +38,30 @@ func NewServer() (
 	config *util.Config,
 	dialer *gomail.Dialer,
 	redisDb *redis.Client,
+	logger *zap.Logger,
 	err error,
 ) {
 
+	logger, err = zap.NewDevelopment()
+	if err != nil {
+		fmt.Println("can't create zap logger")
+	}
+	defer logger.Sync()
+	sugar := logger.Sugar()
+
 	config, err = util.LoadConfig(".")
 	if err != nil {
-		log.Println("cannot load config:", err)
+		sugar.Fatalf("cannot load config:", err)
 		return
 	}
-	fmt.Println(config)
+	logger.Info("Load configuration successfully")
 	dataBase, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
-		log.Println("cannot open data base.", err)
+		sugar.Fatalf("cannot open data base.", err)
+		return
 	}
+	sugar.Infoln("Database is opened successfully")
+
 	// Create Redis Client
 	redisDb = redis.NewClient(&redis.Options{
 		Addr:     config.RedisClientAddress,

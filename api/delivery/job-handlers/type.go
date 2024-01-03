@@ -11,6 +11,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateNewPomoType godoc
+//
+//	@Summary		Create New Pomodoro Types
+//	@Description	Create new pomodoro types
+//	@Tags			jobs
+//	@Accept			json
+//	@Produce		json
+//	@Param			NewPomoType 	body		delivery.CreateNewTypeRequest true "New pomodoro type"
+//	@Success		200				{object}	response.Response
+//	@Failure		400				{object}	gin.H	"Bad Request"
+//	@Failure		500				{object}	gin.H "Internal serever error"
+//	@Router			/jobs/types [post]
 func (pomo *jobHandlers) CreateNewPomoType(ctx *gin.Context) {
 	var req delivery.CreateNewTypeRequest
 	err := ctx.ShouldBindJSON(&req)
@@ -31,6 +43,16 @@ func (pomo *jobHandlers) CreateNewPomoType(ctx *gin.Context) {
 
 }
 
+// GetPomoType godoc
+//
+//	@Summary		Get Pomodoro Types
+//	@Description	Get all pomodoros type of this user
+//	@Tags			jobs
+//	@Accept			json
+//	@Produce		json
+//	@Success		200			{object}	response.Response
+//	@Failure		500			{object}	gin.H "Internal serever error"
+//	@Router			/jobs/types [get]
 func (pomo *jobHandlers) GetPomoType(ctx *gin.Context) {
 	types, err := pomo.jobService.GetTypes(ctx, delivery.GetUserId(ctx))
 	if err != nil {
@@ -43,6 +65,20 @@ func (pomo *jobHandlers) GetPomoType(ctx *gin.Context) {
 	})
 }
 
+// GetPomoType godoc
+//
+//	@Summary		Update Pomodoro Types
+//	@Description	Update pomodoros type of this user
+//	@Tags			jobs
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		int								true	"Type ID"
+//	@Param			type	body		delivery.CreateNewTypeRequest	true	"Update pomo type"
+//	@Success		200		{object}	db.Type	"Update type successfully"
+//	@Failure		400		{object}	gin.H	"Bad Request"
+//	@Failure		404		{object}	gin.H 	"Not found user_id or type_id"
+//	@Failure		500		{object}	gin.H 	"Internal serever error"
+//	@Router			/jobs/types [put]
 func (pomo *jobHandlers) UpdatePomoType(ctx *gin.Context) {
 	var req delivery.CreateNewTypeRequest
 
