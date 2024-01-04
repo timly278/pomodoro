@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 	"pomodoro/api/delivery"
 	"pomodoro/shared/response"
@@ -78,8 +77,7 @@ func (u *authHandlers) Register(ctx *gin.Context) {
 //	@Router			/auth/login [post]
 func (u *authHandlers) Login(ctx *gin.Context) {
 	var req delivery.LoginRequest
-	fmt.Println("client IP:", ctx.ClientIP())
-	fmt.Println("UserAgent:", ctx.Request.UserAgent())
+
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))

@@ -1,10 +1,9 @@
-package middleware
+package mdw
 
 import (
 	"errors"
 	"fmt"
 	"net/http"
-	db "pomodoro/db/sqlc"
 	"pomodoro/security"
 	"pomodoro/shared/response"
 	"strconv"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
 const (
@@ -25,19 +25,19 @@ const (
 )
 
 // EnsureLoggedIn requires user authenticated
-func EnsureLoggedIn(tokenMaker security.TokenMaker, store db.Store, redisdb *redis.Client) gin.HandlerFunc {
+func (m *Middleware) EnsureLoggedIn() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		accessToken, err := parseAccessToken(ctx)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
-		if IsAccessTokenInBlackList(redisdb, accessToken, ctx) {
+		if isAccessTokenInBlackList(m.redisdb, accessToken, ctx) {
 			err = errors.New("user has logged out, must login again")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
 
-		payload, err := tokenMaker.VerifyToken(accessToken, security.SUBJECT_CLAIM_ACCESS_TOKEN)
+		payload, err := m.tokenMaker.VerifyToken(accessToken, security.SUBJECT_CLAIM_ACCESS_TOKEN)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
@@ -47,7 +47,7 @@ func EnsureLoggedIn(tokenMaker security.TokenMaker, store db.Store, redisdb *red
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
 		}
 
-		user, err := store.GetUserById(ctx, int64(id))
+		user, err := m.store.GetUserById(ctx, int64(id))
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse(err))
 		}
@@ -55,7 +55,7 @@ func EnsureLoggedIn(tokenMaker security.TokenMaker, store db.Store, redisdb *red
 		if user.IsBlocked {
 			// add accessToken to blackList of redis
 			expireAt := payload.ExpiresAt.Time
-			err := redisdb.Set(ctx, accessToken, BLACKLIST_CONTAINS_ACCESS_TOKEN, time.Until(expireAt)).Err()
+			err := m.redisdb.Set(ctx, accessToken, BLACKLIST_CONTAINS_ACCESS_TOKEN, time.Until(expireAt)).Err()
 			if err != nil {
 				ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse(err))
 			}
@@ -66,7 +66,25 @@ func EnsureLoggedIn(tokenMaker security.TokenMaker, store db.Store, redisdb *red
 		ctx.Set(AUTHORIZATION_PAYLOAD_KEY, payload)
 		ctx.Set(AUTHORIZATION_ACCESSTOKEN_KEY, accessToken)
 		ctx.Set(AUTHORIZATION_USERID_KEY, int64(id))
+
+		path := ctx.Request.URL.Path
+		raw := ctx.Request.URL.RawQuery
+
 		ctx.Next()
+
+		if raw != "" {
+			path = path + "?" + raw
+		}
+		msg := fmt.Sprintf("[GIN] %d | %15s | %s | %s",
+			ctx.Writer.Status(),
+			ctx.ClientIP(),
+			ctx.Request.Method,
+			path,
+		)
+		m.logger.Info(
+			msg,
+			zap.Any("payload", payload),
+		)
 	}
 }
 
@@ -96,7 +114,7 @@ func parseAccessToken(ctx *gin.Context) (string, error) {
 	return accessToken, nil
 }
 
-func IsAccessTokenInBlackList(redisdb *redis.Client, accessToken string, ctx *gin.Context) bool {
+func isAccessTokenInBlackList(redisdb *redis.Client, accessToken string, ctx *gin.Context) bool {
 
 	redis, err := redisdb.Get(ctx, accessToken).Result()
 	fmt.Println("redis check blacklist:", redis)

@@ -1,12 +1,9 @@
 package delivery
 
 import (
-	db "pomodoro/db/sqlc"
-	"pomodoro/security"
-	"pomodoro/shared/middleware"
+	mdw "pomodoro/shared/middleware"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 /*
@@ -45,11 +42,10 @@ missing types:
 func MapAuthRoutes(
 	route *gin.Engine,
 	h AuthHandlers,
-	tokenMaker security.TokenMaker,
-	store db.Store,
-	redisdb *redis.Client,
+	mware *mdw.Middleware,
 ) {
 	route.GET("/", h.Home)
+	// route.Use(gin.Logger())
 	group := route.Group("api/v1/auth")
 	group.POST("/refresh-token", h.RefreshToken)
 	group.POST("/send-emailverification", h.SendEmailVerification)
@@ -58,8 +54,8 @@ func MapAuthRoutes(
 	group.POST("/login", h.Login)
 
 	// TODO: not implemented feature
-	group.POST("/logout", middleware.EnsureLoggedIn(tokenMaker, store, redisdb), h.Logout)
-	group.PUT("/update-password", middleware.EnsureLoggedIn(tokenMaker, store, redisdb), h.UpdatePassword)
+	group.POST("/logout", mware.EnsureLoggedIn(), h.Logout)
+	group.PUT("/update-password", mware.EnsureLoggedIn(), h.UpdatePassword)
 
 	// TODO: group.PUT("/reset-password", h.UpdatePassword) // forget password
 }
@@ -67,13 +63,11 @@ func MapAuthRoutes(
 func MapJobsRoutes(
 	router *gin.Engine,
 	h JobHandlers,
-	tokenMaker security.TokenMaker,
-	store db.Store,
-	redisdb *redis.Client,
+	mware *mdw.Middleware,
 ) {
 	group := router.Group("api/v1/jobs")
 
-	group.Use(middleware.EnsureLoggedIn(tokenMaker, store, redisdb))
+	group.Use(mware.EnsureLoggedIn())
 
 	group.PUT("/update-user-setting", h.UpdateUserSetting) // need middleware
 	group.POST("/pomodoros", h.CreateNewPomodoro)
