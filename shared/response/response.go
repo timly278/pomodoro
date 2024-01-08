@@ -3,9 +3,11 @@ package response
 import (
 	db "pomodoro/db/sqlc"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Response struct {
+type response struct {
 	Message string `json:"message"`
 	Data    any    `json:"data"`
 }
@@ -35,12 +37,17 @@ type UserSettingResponse struct {
 	RepeatAlarm int32  `json:"repeat_alarm"`
 }
 
-func NewUserResponse(user *db.User) UserResponse {
-	return UserResponse{
+func NewUserResponse(user *db.User) *UserResponse {
+	return &UserResponse{
 		ID:                user.ID,
 		Username:          user.Username,
 		Email:             user.Email,
 		PasswordChangedAt: user.PasswordChangedAt,
 		CreatedAt:         user.CreatedAt,
 	}
+}
+
+func Response(ctx *gin.Context, mess string, data any) response {
+	ctx.Set(RESPONSE_CONTEXT_KEYWORD, mess)
+	return response{Message: mess, Data: data}
 }

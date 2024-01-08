@@ -45,13 +45,12 @@ func MapAuthRoutes(
 	mware *mdw.Middleware,
 ) {
 	route.GET("/", h.Home)
-	// route.Use(gin.Logger())
 	group := route.Group("api/v1/auth")
-	group.POST("/refresh-token", h.RefreshToken)
-	group.POST("/send-emailverification", h.SendEmailVerification)
-	group.POST("/verify-code", h.VerifyCode)
-	group.POST("/register", h.Register)
-	group.POST("/login", h.Login)
+	group.POST("/refresh-token", mware.Logger(), h.RefreshToken)
+	group.POST("/send-emailverification", mware.Logger(), h.SendEmailVerification)
+	group.POST("/verify-code", mware.Logger(), h.VerifyCode)
+	group.POST("/register", mware.Logger(), h.Register)
+	group.POST("/login", mware.Logger(), h.Login)
 
 	// TODO: not implemented feature
 	group.POST("/logout", mware.EnsureLoggedIn(), h.Logout)
@@ -66,7 +65,7 @@ func MapJobsRoutes(
 	mware *mdw.Middleware,
 ) {
 	group := router.Group("api/v1/jobs")
-
+	gin.Logger()
 	group.Use(mware.EnsureLoggedIn())
 
 	group.PUT("/update-user-setting", h.UpdateUserSetting) // need middleware

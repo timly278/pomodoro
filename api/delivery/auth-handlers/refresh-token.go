@@ -6,7 +6,6 @@ import (
 	"pomodoro/shared/response"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 // RefreshToken godoc
@@ -27,18 +26,18 @@ func (t *authHandlers) RefreshToken(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 	newTokens, err := t.authService.RefreshTokens(ctx, req)
 	if err != nil {
-		t.logger.Info("refresh token is unauthorized", zap.String("detail", err.Error()))
-		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(err))
+		ctx.JSON(http.StatusUnauthorized, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "refresh token successfully",
-		Data:    newTokens,
-	})
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		"refresh token successfully",
+		newTokens,
+	))
 }

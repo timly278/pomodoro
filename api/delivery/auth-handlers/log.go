@@ -1,12 +1,12 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"pomodoro/api/delivery"
 	"pomodoro/shared/response"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 func (u *authHandlers) Home(ctx *gin.Context) {
@@ -33,32 +33,28 @@ func (u *authHandlers) Register(ctx *gin.Context) {
 	var req delivery.CreateUserRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	user, statusCode, err := u.userService.CreateUser(ctx, &req)
 	if err != nil {
-		ctx.JSON(statusCode, response.ErrorResponse(err))
+		ctx.JSON(statusCode, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	err = u.authService.SendEmailVerification(ctx, req.Email)
 	if err != nil {
-		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(err))
+		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	rsp := response.NewUserResponse(user)
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "register successfully, waiting for email verification.",
-		Data:    rsp,
-	})
-	u.logger.Info(
-		"New user registered successfully.",
-		zap.String("username", rsp.Username),
-		zap.String("email", rsp.Email),
-	)
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		fmt.Sprintf("%s | %s | register successfully, waiting for email verification.", req.Email, req.Username),
+		rsp,
+	))
 }
 
 // Login godoc
@@ -80,38 +76,37 @@ func (u *authHandlers) Login(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	rsp, code, err := u.authService.Login(ctx, &req)
 	if err != nil {
-		ctx.JSON(code, response.ErrorResponse(err))
+		ctx.JSON(code, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "loggin successfully",
-		Data:    rsp,
-	})
-	u.logger.Info(
-		"User loggin",
-		zap.String("email", req.Email),
-	)
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		fmt.Sprintf("%s | loggin successfully", req.Email),
+		&rsp,
+	))
 }
 
 func (u *authHandlers) Logout(ctx *gin.Context) {
 	err := u.authService.Logout(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "loggout successfully"})
+	ctx.JSON(http.StatusOK, response.Response(ctx, "loggout successfully", ""))
 }
 
 func (u *authHandlers) UpdatePassword(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, response.Response{
-		Message: "c",
-	})
+	ctx.JSON(http.StatusNotImplemented, response.Response(
+		ctx,
+		"Not implemented: the feature UpdatePassword",
+		"",
+	))
 }

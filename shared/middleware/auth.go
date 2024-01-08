@@ -30,26 +30,26 @@ func (m *Middleware) EnsureLoggedIn() gin.HandlerFunc {
 
 		accessToken, err := parseAccessToken(ctx)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(ctx, err))
 		}
 		if isAccessTokenInBlackList(m.redisdb, accessToken, ctx) {
 			err = errors.New("user has logged out, must login again")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(ctx, err))
 		}
 
 		payload, err := m.tokenMaker.VerifyToken(accessToken, security.SUBJECT_CLAIM_ACCESS_TOKEN)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(ctx, err))
 		}
 
 		id, err := strconv.Atoi(payload.RegisteredClaims.ID)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(ctx, err))
 		}
 
 		user, err := m.store.GetUserById(ctx, int64(id))
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		}
 
 		if user.IsBlocked {
@@ -57,10 +57,10 @@ func (m *Middleware) EnsureLoggedIn() gin.HandlerFunc {
 			expireAt := payload.ExpiresAt.Time
 			err := m.redisdb.Set(ctx, accessToken, BLACKLIST_CONTAINS_ACCESS_TOKEN, time.Until(expireAt)).Err()
 			if err != nil {
-				ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse(err))
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 			}
 			err = errors.New("access token has been revoked")
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(err))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response.ErrorResponse(ctx, err))
 		}
 
 		ctx.Set(AUTHORIZATION_PAYLOAD_KEY, payload)
@@ -75,15 +75,17 @@ func (m *Middleware) EnsureLoggedIn() gin.HandlerFunc {
 		if raw != "" {
 			path = path + "?" + raw
 		}
-		msg := fmt.Sprintf("[GIN] %d | %15s | %s | %s",
+		msg := fmt.Sprintf("[GIN] %d | %15s | %s | %s | %s |",
 			ctx.Writer.Status(),
 			ctx.ClientIP(),
+			ctx.Request.UserAgent(),
 			ctx.Request.Method,
 			path,
 		)
 		m.logger.Info(
 			msg,
-			zap.Any("payload", payload),
+			zap.Int("user_id", id),
+			zap.Any("response", ctx.Value(response.RESPONSE_CONTEXT_KEYWORD)),
 		)
 	}
 }

@@ -7,7 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ErrorResponse(err error) gin.H {
+const (
+	RESPONSE_CONTEXT_KEYWORD = "http response"
+)
+
+func ErrorResponse(ctx *gin.Context, err error) gin.H {
+	ctx.Set(RESPONSE_CONTEXT_KEYWORD, err)
 	if strings.Contains(err.Error(), "\n") {
 		errs := strings.SplitAfter(err.Error(), "\n")
 		maping := make(map[string]any)

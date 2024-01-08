@@ -25,18 +25,19 @@ func (u *jobHandlers) UpdateUserSetting(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	newSetting, err := u.userService.UpdateUserSetting(ctx, delivery.GetUserId(ctx), &req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "update fields successfully",
-		Data:    newSetting,
-	})
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		"update user settings successfully",
+		newSetting,
+	))
 }

@@ -28,17 +28,17 @@ func (pomo *jobHandlers) CreateNewPomodoro(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	pomodoro, err := pomo.jobService.CreatePomodoro(ctx, delivery.GetUserId(ctx), &req)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, response.ErrorResponse(err))
+			ctx.JSON(http.StatusNotFound, response.ErrorResponse(ctx, err))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		return
 	}
 	ctx.JSON(http.StatusOK, pomodoro)
@@ -61,21 +61,22 @@ func (pomo *jobHandlers) ListPomodorosByDates(ctx *gin.Context) {
 	var req delivery.GetPomodorosRequest
 	err := ctx.ShouldBindQuery(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	userID := delivery.GetUserId(ctx)
 	pomos, err := pomo.jobService.GetPomodorosByDates(ctx, userID, &req)
 	if err != nil && err != sql.ErrNoRows {
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: fmt.Sprintf("list pomodoros from %v to %v\n", req.FromDate, req.ToDate),
-		Data:    pomos,
-	})
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		fmt.Sprintf("list pomodoros from %v to %v\n", req.FromDate, req.ToDate),
+		pomos,
+	))
 
 }
 
@@ -95,22 +96,22 @@ func (pomo *jobHandlers) GetMinutesFocused(ctx *gin.Context) {
 	var req delivery.GetStatisticRequest
 	err := ctx.ShouldBindQuery(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	userID := delivery.GetUserId(ctx)
 	minutesFocused, err := pomo.jobService.GetMinutesFocused(ctx, userID, &req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusOK, response.Response(ctx, "successfully get data", gin.H{
 		"from_date":       req.FromDate,
 		"to_date":         req.ToDate,
 		"minutes_focused": minutesFocused,
-	})
+	}))
 }
 
 // GetDaysAccessed godoc
@@ -129,20 +130,20 @@ func (pomo *jobHandlers) GetDaysAccessed(ctx *gin.Context) {
 	var req delivery.GetStatisticRequest
 	err := ctx.ShouldBindQuery(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	userID := delivery.GetUserId(ctx)
 	daysAccessed, err := pomo.jobService.GetDaysAccessed(ctx, userID, &req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"from_date":     req.FromDate,
-		"to_date":       req.ToDate,
-		"days_accessed": daysAccessed,
-	})
+	ctx.JSON(http.StatusOK, response.Response(ctx, "successfully get data", gin.H{
+		"from_date":    req.FromDate,
+		"to_date":      req.ToDate,
+		"day_accessed": daysAccessed,
+	}))
 }
