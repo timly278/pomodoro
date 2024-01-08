@@ -11,6 +11,7 @@ import (
 	userservice "pomodoro/api/service/user-service"
 	_ "pomodoro/docs"
 	"pomodoro/server"
+	mdw "pomodoro/shared/middleware"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -52,6 +53,7 @@ func fxApp() *fx.App {
 			userservice.NewUserService,
 			jobs.NewJobHandlers,
 			auth.NewAuthHandlers,
+			mdw.New,
 		),
 		fx.Invoke(
 			delivery.MapAuthRoutes,

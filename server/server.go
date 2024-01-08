@@ -6,6 +6,7 @@ import (
 	"fmt"
 	db "pomodoro/db/sqlc"
 	_ "pomodoro/docs"
+	"pomodoro/plogger"
 	"pomodoro/security"
 	"pomodoro/util"
 
@@ -19,6 +20,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	// swagger embed files
+
 	swaggerFiles "github.com/swaggo/files"
 )
 
@@ -41,12 +43,10 @@ func NewServer() (
 	logger *zap.Logger,
 	err error,
 ) {
-
-	logger, err = zap.NewDevelopment()
-	if err != nil {
-		fmt.Println("can't create zap logger")
-	}
+	// logger = zrl.New(zrl.WithFileName("tulb"))
+	logger = plogger.New("pomodoro")
 	defer logger.Sync()
+
 	sugar := logger.Sugar()
 
 	config, err = util.LoadConfig(".")
@@ -82,8 +82,8 @@ func NewServer() (
 		err = fmt.Errorf("cannot create token maker: %w", err)
 		return
 	}
-	router = gin.Default()
-
+	router = gin.New()
+	// TODO: remember to use Recovery() as middleware accompanied by logger()
 	return
 }
 

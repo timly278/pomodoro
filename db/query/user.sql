@@ -23,6 +23,7 @@ SET username = coalesce(sqlc.narg('username'), username),
     hashed_password = coalesce(sqlc.narg('hashed_password'), hashed_password),
     password_changed_at = coalesce(sqlc.narg('password_changed_at'), password_changed_at),
     alarm_sound = coalesce(sqlc.narg('alarm_sound'), alarm_sound),
-    repeat_alarm = coalesce(sqlc.narg('repeat_alarm'), repeat_alarm)
+    repeat_alarm = coalesce(sqlc.narg('repeat_alarm'), repeat_alarm),
+    is_blocked = coalesce(sqlc.narg('is_blocked'), is_blocked)
 WHERE id = coalesce(sqlc.narg('id'), 0) OR email = coalesce(sqlc.narg('email'), '')
 RETURNING *;

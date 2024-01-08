@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"pomodoro/api/delivery"
 	db "pomodoro/db/sqlc"
 	"pomodoro/security"
@@ -50,6 +49,10 @@ func (t *authService) newTokens(ctx context.Context, userId int64) (*response.Ne
 			String: refreshToken,
 			Valid:  true,
 		},
+		IsBlocked: sql.NullBool{
+			Bool:  false,
+			Valid: true,
+		},
 	}
 	_, err = t.store.UpdateUser(ctx, params)
 	if err != nil {
@@ -86,7 +89,6 @@ func (t *authService) validateRefreshToken(ctx context.Context, rToken string) (
 	if user.RefreshToken != rToken {
 		err = t.revokeRefreshToken(ctx, user.ID)
 		if err != nil {
-			//logger
 			return 0, err
 		}
 		return 0, errors.New("detected reusing fresh-token")
@@ -95,6 +97,7 @@ func (t *authService) validateRefreshToken(ctx context.Context, rToken string) (
 	return int64(userId), nil
 }
 
+// revokeRefreshToken revokes refresh_token and log out the user from the app
 func (t *authService) revokeRefreshToken(ctx context.Context, userId int64) (err error) {
 	_, err = t.store.UpdateUser(ctx, db.UpdateUserParams{
 		ID: sql.NullInt64{
@@ -105,8 +108,11 @@ func (t *authService) revokeRefreshToken(ctx context.Context, userId int64) (err
 			String: REVOKED_REFRESH_TOKEN,
 			Valid:  true,
 		},
+		IsBlocked: sql.NullBool{
+			Bool:  true,
+			Valid: true,
+		},
 	})
-	fmt.Printf("err : %v\n", err)
 	return
 }
 

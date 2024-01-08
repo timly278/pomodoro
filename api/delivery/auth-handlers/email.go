@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"pomodoro/api/delivery"
 	_ "pomodoro/docs"
@@ -29,20 +30,21 @@ func (eh *authHandlers) SendEmailVerification(ctx *gin.Context) {
 	var req delivery.SendCodeRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	err = eh.authService.SendEmailVerification(ctx, req.Email)
 	if err != nil {
-		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(err))
+		ctx.JSON(http.StatusNotAcceptable, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "verification email has sent",
-		Data:    req.Email,
-	})
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		fmt.Sprintf("verification email has sent to %s ", req.Email),
+		req.Email,
+	))
 
 }
 
@@ -61,21 +63,19 @@ func (eh *authHandlers) VerifyCode(ctx *gin.Context) {
 	var req delivery.VerificationRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
 	ok, err := eh.authService.VerifyCode(ctx, req.Email, req.Code)
 	if !ok {
-		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(err))
+		ctx.JSON(http.StatusBadRequest, response.ErrorResponse(ctx, err))
 		return
 	}
 
-	// TODO: how do I let user log-in while Verification Request only contains email, not password?
-	// Does client store password somewhere in memory?
-
-	ctx.JSON(http.StatusOK, response.Response{
-		Message: "email has been verified successfully",
-		Data:    req.Email,
-	})
+	ctx.JSON(http.StatusOK, response.Response(
+		ctx,
+		fmt.Sprintf("%s has been verified successfully", req.Email),
+		req.Email,
+	))
 }
