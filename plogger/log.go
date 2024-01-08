@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pomodoro/util"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -15,7 +16,7 @@ const (
 	CONSOLSE_LOG_LEVEL = zapcore.DebugLevel
 )
 
-func New(filelogName string) *zap.Logger {
+func New(conf *util.Config, filelogName string) *zap.Logger {
 	// TODO: must understand step by step, why did you have to do these step orderly?
 
 	encoderCfg := zap.NewProductionEncoderConfig()
@@ -25,7 +26,7 @@ func New(filelogName string) *zap.Logger {
 	consoleEncoder := zapcore.NewConsoleEncoder(encoderCfg)
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(jsonEncoder, configureWriter(filelogName), FILE_LOG_LEVEL),
+		zapcore.NewCore(jsonEncoder, configureWriter(conf, filelogName), FILE_LOG_LEVEL),
 		zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), CONSOLSE_LOG_LEVEL),
 	)
 	loggerzap := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
@@ -33,11 +34,11 @@ func New(filelogName string) *zap.Logger {
 	return loggerzap
 }
 
-
-func configureWriter(filelogName string) zapcore.WriteSyncer {
+func configureWriter(conf *util.Config, filelogName string) zapcore.WriteSyncer {
 
 	// bind the custom logger to zapcore
-	path := filepath.Join("./logs/", filelogName+".log")
+	// path := filepath.Join("./logs/", filelogName+".log")
+	path := filepath.Join(conf.LogFilesPath, filelogName+".log")
 	fmt.Println("path:", path)
 	return zapcore.AddSync(&lumberjack.Logger{
 		Filename:   path,

@@ -1,5 +1,6 @@
 # Build stage
 FROM --platform=amd64 golang:alpine3.18 AS build-stage
+# FROM golang:alpine3.18 AS build-stage
 
 WORKDIR /app4
 
@@ -17,6 +18,7 @@ RUN go build -o ./main .
 
 #Run stage
 FROM --platform=amd64 golang:alpine3.18 AS run-stage
+# FROM golang:alpine3.18 AS run-stage
 
 WORKDIR /app4
 

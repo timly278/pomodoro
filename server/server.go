@@ -24,15 +24,6 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 )
 
-// type Server struct {
-// 	store      db.Store
-// 	tokenMaker security.TokenMaker
-// 	config     *util.Config
-// 	dialer     *gomail.Dialer
-// 	redisdb    *redis.Client
-// 	// logger
-// }
-
 func NewServer() (
 	router *gin.Engine,
 	store db.Store,
@@ -43,18 +34,18 @@ func NewServer() (
 	logger *zap.Logger,
 	err error,
 ) {
-	// logger = zrl.New(zrl.WithFileName("tulb"))
-	logger = plogger.New("pomodoro")
+	config, err = util.LoadConfig(".")
+	if err != nil {
+		fmt.Println("cannot load config:", err)
+		return
+	}
+	fmt.Println("Load configuration successfully")
+
+	logger = plogger.New(config, "pomodoro")
 	defer logger.Sync()
 
 	sugar := logger.Sugar()
 
-	config, err = util.LoadConfig(".")
-	if err != nil {
-		sugar.Fatalf("cannot load config:", err)
-		return
-	}
-	logger.Info("Load configuration successfully")
 	dataBase, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		sugar.Fatalf("cannot open data base.", err)
@@ -83,7 +74,6 @@ func NewServer() (
 		return
 	}
 	router = gin.New()
-	// TODO: remember to use Recovery() as middleware accompanied by logger()
 	return
 }
 

@@ -17,6 +17,9 @@ services:
     environment:
       - DB_SOURCE=postgresql://tulb:secret@pg4:5432/pomodoro?sslmode=disable
       - REDIS_CLIENT_ADDRESS=redis:6379
+      - LOG_FILES_PATH=/app4/logs/
+    volumes: 
+      - ./logs:/app4/logs
   db:
     image: postgres
     container_name: postgrestulb4
