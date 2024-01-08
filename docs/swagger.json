@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Pomodoro Application Api Server.",
+        "description": "Pomodoro Application Api Server. This app helps people study and work at better productivity.",
         "title": "Pomodoro API",
         "contact": {},
         "version": "1.0"
@@ -37,7 +37,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -95,7 +95,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -147,7 +147,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -205,7 +205,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -257,7 +257,7 @@
                     "200": {
                         "description": "email has been verified successfully",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -477,7 +477,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "500": {
@@ -572,7 +572,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -618,7 +618,7 @@
                     "200": {
                         "description": "Update user setting successfully",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -901,7 +901,7 @@
             "type": "object",
             "additionalProperties": {}
         },
-        "response.Response": {
+        "response.response": {
             "type": "object",
             "properties": {
                 "data": {},

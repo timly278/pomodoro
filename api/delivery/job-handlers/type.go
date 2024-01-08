@@ -19,7 +19,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			NewPomoType 	body		delivery.CreateNewTypeRequest true "New pomodoro type"
-//	@Success		200				{object}	response.Response
+//	@Success		200				{object}	response.response
 //	@Failure		400				{object}	gin.H	"Bad Request"
 //	@Failure		500				{object}	gin.H "Internal serever error"
 //	@Router			/jobs/types [post]
@@ -51,7 +51,7 @@ func (pomo *jobHandlers) CreateNewPomoType(ctx *gin.Context) {
 //	@Tags			jobs
 //	@Accept			json
 //	@Produce		json
-//	@Success		200			{object}	response.Response
+//	@Success		200			{object}	response.response
 //	@Failure		500			{object}	gin.H "Internal serever error"
 //	@Router			/jobs/types [get]
 func (pomo *jobHandlers) GetPomoType(ctx *gin.Context) {

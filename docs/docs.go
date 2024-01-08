@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -101,7 +101,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -153,7 +153,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -211,7 +211,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -263,7 +263,7 @@ const docTemplate = `{
                     "200": {
                         "description": "email has been verified successfully",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -483,7 +483,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "500": {
@@ -578,7 +578,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -624,7 +624,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Update user setting successfully",
                         "schema": {
-                            "$ref": "#/definitions/response.Response"
+                            "$ref": "#/definitions/response.response"
                         }
                     },
                     "400": {
@@ -907,7 +907,7 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {}
         },
-        "response.Response": {
+        "response.response": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -938,7 +938,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Pomodoro API",
-	Description:      "Pomodoro Application Api Server.",
+	Description:      "Pomodoro Application Api Server. This app helps people study and work at better productivity.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

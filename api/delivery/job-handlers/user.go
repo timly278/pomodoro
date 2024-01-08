@@ -16,7 +16,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			userSetting	body		delivery.UpdateUserSettingRequest	true	"Update user setting"
-//	@Success		200			{object}	response.Response	"Update user setting successfully"
+//	@Success		200			{object}	response.response	"Update user setting successfully"
 //	@Failure		400			{object}	gin.H				"Bad Request"
 //	@Failure		500			{object}	gin.H 				"Internal serever error"
 //	@Router			/jobs/update-user-setting [put]

@@ -16,7 +16,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			token 	body		delivery.RefreshTokenRequest true "refresh access token"
-//	@Success		200		{object}	response.Response
+//	@Success		200		{object}	response.response
 //	@Failure		400		{object}	gin.H	"Bad Request"
 //	@Failure		401		{object}	gin.H "Refresh token is unauthorized"
 //	@Failure		500		{object}	gin.H "Internal serever error"

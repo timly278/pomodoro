@@ -183,7 +183,7 @@ definitions:
   gin.H:
     additionalProperties: {}
     type: object
-  response.Response:
+  response.response:
     properties:
       data: {}
       message:
@@ -200,7 +200,8 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Pomodoro Application Api Server.
+  description: Pomodoro Application Api Server. This app helps people study and work
+    at better productivity.
   title: Pomodoro API
   version: "1.0"
 paths:
@@ -222,7 +223,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:
@@ -260,7 +261,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:
@@ -294,7 +295,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:
@@ -332,7 +333,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:
@@ -366,7 +367,7 @@ paths:
         "200":
           description: email has been verified successfully
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:
@@ -510,7 +511,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "500":
           description: Internal serever error
           schema:
@@ -535,7 +536,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:
@@ -603,7 +604,7 @@ paths:
         "200":
           description: Update user setting successfully
           schema:
-            $ref: '#/definitions/response.Response'
+            $ref: '#/definitions/response.response'
         "400":
           description: Bad Request
           schema:

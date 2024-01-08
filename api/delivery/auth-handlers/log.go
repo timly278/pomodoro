@@ -23,7 +23,7 @@ func (u *authHandlers) Home(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			NewUser 	body		delivery.CreateUserRequest true "Create new user"
-//	@Success		200			{object}	response.Response
+//	@Success		200			{object}	response.response
 //	@Failure		400			{object}	gin.H	"Bad Request"
 //	@Failure		406			{object}	gin.H "email spam, verification code has created and sent"
 //	@Failure		409			{object}	gin.H "email existed"
@@ -65,7 +65,7 @@ func (u *authHandlers) Register(ctx *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			user 	body		delivery.LoginRequest true "user login"
-//	@Success		200		{object}	response.Response
+//	@Success		200		{object}	response.response
 //	@Failure		400		{object}	gin.H	"Bad Request"
 //	@Failure		403		{object}	gin.H "password does not match"
 //	@Failure		406		{object}	gin.H "email has not verified"
