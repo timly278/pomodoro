@@ -1,12 +1,16 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Pomodoro Application Api Server. This app helps people study and work at better productivity.",
+        "description": "Pomodoro Application Api Server. This app helps people study and work at better productivity.\nBackend Language: Golang\nDatabase: PostgreSQL, Redis\nFramework: Gin, sqlc, uber-fx (for dependency injection), uber-zap (for logging files)\nDeployment: AWS EC2, Nginx",
         "title": "Pomodoro API",
-        "contact": {},
+        "contact": {
+            "name": "Ly Tu",
+            "url": "https://github.com/timly278/pomodoro",
+            "email": "timly278@gmail.com"
+        },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "18.140.71.34",
     "basePath": "/api/v1",
     "paths": {
         "/auth/login": {

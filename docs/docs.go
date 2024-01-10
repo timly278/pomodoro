@@ -9,7 +9,11 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "Ly Tu",
+            "url": "https://github.com/timly278/pomodoro",
+            "email": "timly278@gmail.com"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -934,11 +938,11 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "18.140.71.34",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Pomodoro API",
-	Description:      "Pomodoro Application Api Server. This app helps people study and work at better productivity.",
+	Description:      "Pomodoro Application Api Server. This app helps people study and work at better productivity.\nBackend Language: Golang\nDatabase: PostgreSQL, Redis\nFramework: Gin, sqlc, uber-fx (for dependency injection), uber-zap (for logging files)\nDeployment: AWS EC2, Nginx",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
