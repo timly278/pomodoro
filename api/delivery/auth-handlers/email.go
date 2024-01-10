@@ -18,7 +18,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			email	body		delivery.SendCodeRequest	true	"send code"
-//	@Success		200		{object}	response.Response
+//	@Success		200		{object}	response.response
 //	@Failure		400		{object}	gin.H	"Bad Request"
 //	@Failure		406		{object}	gin.H 	"email spam, verification code has created and sent"
 //	@Failure		500		{object}	gin.H 	"internal serever error"
@@ -57,7 +57,7 @@ func (eh *authHandlers) SendEmailVerification(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			Email&Code	body		delivery.VerificationRequest	true	"verify code"
 //	@Failure		400			{object}	gin.H				"Bad Request"
-//	@Success		200			{object}	response.Response	"email has been verified successfully"
+//	@Success		200			{object}	response.response	"email has been verified successfully"
 //	@Router			/auth/verify-code [post]
 func (eh *authHandlers) VerifyCode(ctx *gin.Context) {
 	var req delivery.VerificationRequest

@@ -20,6 +20,7 @@ type Config struct {
 	RedisClientAddress   string        `mapstructure:"REDIS_CLIENT_ADDRESS"`
 	RedisDbPassword      string        `mapstructure:"REDIS_DB_PASSWORD"`
 	RedisDb              int           `mapstructure:"REDIS_DB"`
+	LogFilesPath         string        `mapstructure:"LOG_FILES_PATH"`
 }
 
 func LoadConfig(path string) (*Config, error) {

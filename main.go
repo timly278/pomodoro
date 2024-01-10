@@ -21,8 +21,16 @@ import (
 //	@title			Pomodoro API
 //	@version		1.0
 //	@description	Pomodoro Application Api Server. This app helps people study and work at better productivity.
+//	@description	Backend Language: Golang
+//	@description	Database: PostgreSQL, Redis
+//	@description	Framework: Gin, sqlc, uber-fx (for dependency injection), uber-zap (for logging files)
+//	@description	Deployment: AWS EC2, Nginx
 
-// @host		localhost:8080
+//	@contact.name	Ly Tu
+//	@contact.url	https://github.com/timly278/pomodoro
+//	@contact.email	timly278@gmail.com
+
+// @host		18.140.71.34
 // @BasePath	/api/v1
 func main() {
 

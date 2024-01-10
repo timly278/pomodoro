@@ -46,15 +46,15 @@ func MapAuthRoutes(
 ) {
 	route.GET("/", h.Home)
 	group := route.Group("api/v1/auth")
-	group.POST("/refresh-token", mware.Logger(), h.RefreshToken)
-	group.POST("/send-emailverification", mware.Logger(), h.SendEmailVerification)
-	group.POST("/verify-code", mware.Logger(), h.VerifyCode)
-	group.POST("/register", mware.Logger(), h.Register)
-	group.POST("/login", mware.Logger(), h.Login)
+	group.POST("/refresh-token", mware.Logger(), gin.Recovery(), h.RefreshToken)
+	group.POST("/send-emailverification", mware.Logger(), gin.Recovery(), h.SendEmailVerification)
+	group.POST("/verify-code", mware.Logger(), gin.Recovery(), h.VerifyCode)
+	group.POST("/register", mware.Logger(), gin.Recovery(), h.Register)
+	group.POST("/login", mware.Logger(), gin.Recovery(), h.Login)
 
 	// TODO: not implemented feature
-	group.POST("/logout", mware.EnsureLoggedIn(), h.Logout)
-	group.PUT("/update-password", mware.EnsureLoggedIn(), h.UpdatePassword)
+	group.POST("/logout", mware.EnsureLoggedIn(), gin.Recovery(), h.Logout)
+	group.PUT("/update-password", mware.EnsureLoggedIn(), gin.Recovery(), h.UpdatePassword)
 
 	// TODO: group.PUT("/reset-password", h.UpdatePassword) // forget password
 }
@@ -66,7 +66,7 @@ func MapJobsRoutes(
 ) {
 	group := router.Group("api/v1/jobs")
 	gin.Logger()
-	group.Use(mware.EnsureLoggedIn())
+	group.Use(mware.EnsureLoggedIn(), gin.Recovery())
 
 	group.PUT("/update-user-setting", h.UpdateUserSetting) // need middleware
 	group.POST("/pomodoros", h.CreateNewPomodoro)

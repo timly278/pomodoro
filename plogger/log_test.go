@@ -1,11 +1,13 @@
 package plogger
 
 import (
+	"pomodoro/util"
 	"testing"
 )
 
 func TestLog(t *testing.T) {
-	logger := New("pomodoro")
+	conf := &util.Config{LogFilesPath: "./logs/"}
+	logger := New(conf, "pomodoro")
 
 	logger.Info("tulb")
 	sugar := logger.Sugar()
