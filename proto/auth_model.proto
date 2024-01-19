@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+
+option go_package = "pomodoro/pb";
+
+message CreateUserRequest {
+    string username = 1;
+	string password = 2; 
+	string email   = 3;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}

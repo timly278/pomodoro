@@ -1,31 +1,33 @@
-package server
+package gserver
 
 import (
 	"crypto/tls"
 	"database/sql"
 	"fmt"
+	"log"
+	"net"
 	db "pomodoro/db/sqlc"
-	_ "pomodoro/docs"
+	gapi "pomodoro/gapi/auth-handlers"
+	"pomodoro/pb"
 	"pomodoro/plogger"
 	"pomodoro/security"
 	"pomodoro/util"
 
-	"go.uber.org/zap"
-
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	gomail "gopkg.in/mail.v2"
 
-	// gin-swagger middleware
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	// swagger embed files
-
-	swaggerFiles "github.com/swaggo/files"
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
-func NewServer() (
-	router *gin.Engine,
+type gRPCServer struct {
+	gapi.AuthHandlers
+	//JobsHandlers...
+}
+
+// Construct components of GRPC server
+func NewGrpcServerComponents() (
 	store db.Store,
 	tokenMaker security.TokenMaker,
 	config *util.Config,
@@ -73,13 +75,27 @@ func NewServer() (
 		err = fmt.Errorf("cannot create token maker: %w", err)
 		return
 	}
-	router = gin.New()
 	return
 }
 
-func Run(router *gin.Engine, config *util.Config) {
+func NewServer(auth *gapi.AuthHandlers) *gRPCServer {
+	return &gRPCServer{AuthHandlers: *auth}
+}
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+func Run(config *util.Config, server *gRPCServer) {
 
-	router.Run(config.HttpServerAddress)
+	grpcServer := grpc.NewServer()
+	pb.RegisterAuthHandlersServer(grpcServer, server)
+	reflection.Register(grpcServer)
+
+	lis, err := net.Listen("tcp", config.GrpcServerAddress)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	log.Printf("started gRPC at %v\n", config.GrpcServerAddress)
+	err = grpcServer.Serve(lis)
+	if err != nil {
+		log.Fatal("cannot start gRPC server")
+	}
 }

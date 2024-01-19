@@ -6,12 +6,6 @@ type CreateUserRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 }
 
-type UpdateUserSettingRequest struct {
-	Username    string `json:"username" binding:"required,alphanum"`
-	AlarmSound  string `json:"alarm_sound" binding:"required"`
-	RepeatAlarm int32  `json:"repeat_alarm" binding:"required,min=1,max=10"`
-}
-
 type SendCodeRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }

@@ -10,6 +10,8 @@ import (
 	jobservice "pomodoro/api/service/job-service"
 	userservice "pomodoro/api/service/user-service"
 	_ "pomodoro/docs"
+	gapi "pomodoro/gapi/auth-handlers"
+	"pomodoro/gserver"
 	"pomodoro/server"
 	mdw "pomodoro/shared/middleware"
 	"time"
@@ -34,7 +36,7 @@ import (
 // @BasePath	/api/v1
 func main() {
 
-	app := fxApp()
+	app := FxGrpcApp()
 	// In a typical application, we could just use app.Run() here. Since we
 	// don't want this example to run forever, we'll use the more-explicit Start
 	// and Stop.
@@ -52,7 +54,23 @@ func main() {
 
 }
 
-func fxApp() *fx.App {
+func FxGrpcApp() *fx.App {
+	return fx.New(
+		fx.Provide(
+			gserver.NewServer,
+			gserver.NewGrpcServerComponents,
+			jobservice.NewJobService,
+			authservice.NewAuthService,
+			userservice.NewUserService,
+			gapi.NewAuthHandlers,
+		),
+		fx.Invoke(
+			gserver.Run,
+		),
+	)
+}
+
+func FxHttpApp() *fx.App {
 	return fx.New(
 		fx.Provide(
 			server.NewServer,

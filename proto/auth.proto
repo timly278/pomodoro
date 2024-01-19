@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+
+option go_package = "pomodoro/pb";
+
+import "auth_model.proto";
+import "response.proto";
+
+service AuthHandlers {
+
+    rpc Register(CreateUserRequest) returns (UserResponse) {};
+
+    rpc Login(LoginRequest) returns (UserLoginResponse) {};
+
+}
+

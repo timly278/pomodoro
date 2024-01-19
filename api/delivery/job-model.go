@@ -30,3 +30,9 @@ type CreateNewTypeRequest struct {
 	Longbreakinterval int32  `json:"longbreakinterval" binding:"required,min=1"`
 	AutostartBreak    bool   `json:"autostart_break" binding:"required,boolean"`
 }
+
+type UpdateUserSettingRequest struct {
+	Username    string `json:"username" binding:"required,alphanum"`
+	AlarmSound  string `json:"alarm_sound" binding:"required"`
+	RepeatAlarm int32  `json:"repeat_alarm" binding:"required,min=1,max=10"`
+}

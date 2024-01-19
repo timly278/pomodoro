@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "pomodoro/pb";
+
+message UserResponse {
+    sint64 i_d = 1;
+    string username = 2;
+    string email = 3;
+    google.protobuf.Timestamp password_changed_at = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+message NewTokensResponse {
+    string refresh_token = 1;
+    sint64 r_t_expire_in = 2;
+    string access_token = 3;
+    sint64 a_t_expire_in = 4;
+}
+
+message UserLoginResponse {
+    NewTokensResponse tokens = 1;
+    UserResponse user = 2;
+}
+
+message UserSettingResponse {
+    string username = 1;
+    string alarm_sound = 2;
+    sint64 repeat_alarm = 3;
+}
